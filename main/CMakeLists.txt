@@ -1,16 +1,15 @@
 idf_component_register(
     SRCS "main.c"
-         "demo_navigation.c"
-         "ui_pixel.c"
-         "ui_pixel_math.c"
-         "demo_display.c"
-         "demo_button.c"
-         "demo_audio.c"
-         "demo_battery.c"
-         "demo_radio.c"
-         "demo_wifi.c"
-         "demo_ble.c"
-         "demo_low_power.c"
-    INCLUDE_DIRS "."
-    REQUIRES bsp bt esp_event esp_hw_support esp_netif esp_timer esp_wifi nvs_flash
+         "road_rage/rr_game.c"
+         "road_rage/rr_render.c"
+         "road_rage/rr_sound.c"
+         "road_rage/rr_device.c"
+    INCLUDE_DIRS "." "road_rage" "../assets/fonts"
+    REQUIRES bsp esp_lcd esp_timer
+)
+
+# Optimize the hot integer renderer/model without changing global debug settings.
+set_source_files_properties(
+    "road_rage/rr_game.c" "road_rage/rr_render.c" "road_rage/rr_sound.c" "road_rage/rr_device.c"
+    PROPERTIES COMPILE_OPTIONS "-O2"
 )

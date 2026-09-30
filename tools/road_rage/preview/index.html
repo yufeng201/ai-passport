@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Road Rage · 狂飙骑手</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header><a class="brand" href="#"><span class="brand-icon">↗</span> PASSPORT ARCADE</a><span class="edition">NO. 001 / COAST HIGHWAY</span></header>
+<main>
+<section class="intro"><div class="eyebrow"><span></span> 握紧车把，挑战五段公路</div><h1>Road <em>Rage.</em></h1><p>甩开车流，击退对手。<br class="mobile">穿过城市与荒漠，一路冲向终点。</p></section>
+<section class="arcade" aria-label="狂飙骑手游戏">
+<div class="device"><div class="device-top"><span class="status-led"></span><span>ROAD RAGE</span><button id="sound" aria-label="开启音效" aria-pressed="false">音效关</button></div>
+<div class="screen"><canvas width="320" height="240" tabindex="0" aria-label="游戏画面，A或左方向键向左，C或右方向键向右，B或空格行动，长按空格暂停"></canvas><div id="loading" role="status">正在准备公路…</div></div>
+<div class="controls"><button data-key="0"><span class="key-cap">A</span><span class="key-action">← 换道</span></button><button data-key="2" class="action"><span class="key-cap">B</span><span class="key-action">开始 / 攻击</span></button><button data-key="1"><span class="key-cap">C</span><span class="key-action">换道 →</span></button></div>
+</div>
+<div class="instructions"><span><kbd>←</kbd><kbd>→</kbd> 换道 <i></i><kbd>SPACE</kbd> 行动</span><span>长按 B 暂停 · 暂停后长按 A 返回</span></div>
+</section>
+<section class="ride-notes"><div><span class="note-index">01</span><p><strong>保持速度</strong>自动加速，找准空隙穿过车流。</p></div><div><span class="note-index">02</span><p><strong>靠近，再出手</strong>对手出现「打」提示时，按 B 击退。</p></div><div><span class="note-index">03</span><p><strong>撑到终点</strong>保护耐久，挑战五条公路，通关解锁下一关。</p></div></section>
+</main>
+<footer><span>THREE KEYS. ONE OPEN ROAD.</span><span>原创像素公路 · 狂飙骑手</span></footer>
+<script type="module" src="game.js"></script>
+</body></html>

@@ -17,6 +17,9 @@ Store reusable font files and generated font sources in `fonts/`.
 - Check Flash and internal-RAM impact before adding a font; the ESP32-C3 has no PSRAM.
 - Do not commit fonts whose license does not permit redistribution.
 
+- `fonts/dusk_noto_sc_subset.otf`: 108-character subset of [Noto Sans CJK SC Regular](https://github.com/notofonts/noto-cjk/tree/main/Sans), under [SIL OFL 1.1](fonts/OFL.txt). Retained for reproducible conversion; not linked into firmware.
+- `fonts/dusk_noto_sc_12.h`: generated monochrome 12px Chinese glyphs in 12 × 14 cells, about 3 KiB of Flash records. Used directly by the shared game renderer; no LVGL font pool or runtime decoding. Copy and glyph coverage are checked by `python3 tools/road_rage/generate_font.py --check`; regenerate with `python3 tools/road_rage/generate_font.py` (Pillow 12.2.0). The source character list is `main/road_rage/rr_copy.h`. Extending it requires rebuilding the OTF subset using `--source <full-source-font.otf>` (fonttools 4.62.1), then rebuilding the preview and firmware.
+
 ## Images
 
 Store reusable source images and generated display assets in `images/`.
@@ -41,3 +44,5 @@ Store reusable music and sound-effect sources in `music/`.
 - Prefer 16 kHz, 16-bit mono PCM when it matches the current BSP audio path.
 - Check Flash and internal-RAM cost before embedding audio; stream or chunk long recordings.
 - Do not commit media without redistribution permission.
+
+- `images/road-rage-cover.png`: portrait 3:4 promotional pixel-art illustration for Road Rage, generated with the built-in imagegen tool. It is cover artwork, not a device screenshot.
