@@ -65,11 +65,16 @@ run_static_checks() {
             -o "${test_dir}/test_demo_${demo}_runtime"
         "${test_dir}/test_demo_${demo}_runtime"
     done
-    "${CC:-cc}" -std=c11 -Wall -Wextra -Werror -Imain/road_rage -Iassets/fonts \
-        tests/test_road_rage.c main/road_rage/rr_game.c main/road_rage/rr_render.c \
-        main/road_rage/rr_sound.c -o "${test_dir}/test_road_rage"
+    "${CC:-cc}" -std=c11 -Wall -Wextra -Werror -Imain/games/road_rage -Imain/games/common -Iassets/fonts \
+        tests/games/test_road_rage.c main/games/road_rage/rr_game.c main/games/road_rage/rr_render.c \
+        main/games/common/game_audio.c -o "${test_dir}/test_road_rage"
     "${test_dir}/test_road_rage"
-    python3 tools/road_rage/generate_font.py --check
+    python3 tools/games/road_rage/generate_font.py --check
+    "${CC:-cc}" -std=c11 -Wall -Wextra -Werror -Imain/games/cloudbound -Iassets/fonts \
+        tests/games/test_cloudbound.c main/games/cloudbound/cb_game.c main/games/cloudbound/cb_render.c \
+        -o "${test_dir}/test_cloudbound"
+    "${test_dir}/test_cloudbound"
+    python3 tools/games/cloudbound/generate_font.py --check
     PYTHONDONTWRITEBYTECODE=1 python3 tests/test_deep_sleep_contract.py
     PYTHONDONTWRITEBYTECODE=1 python3 tests/test_check_repo.py
     PYTHONDONTWRITEBYTECODE=1 python3 tests/test_verify_firmware.py
@@ -92,7 +97,8 @@ run_firmware_checks() (
 
     SDKCONFIG_DEFAULTS="${repo_root}/sdkconfig.defaults" \
         idf.py -B "${validation_build_dir}" \
-        -D "SDKCONFIG=${validation_build_dir}/sdkconfig" build
+        -D "SDKCONFIG=${validation_build_dir}/sdkconfig" \
+        -D "PASSPORT_GAME=${PASSPORT_GAME:-road_rage}" build
     idf.py -B "${validation_build_dir}" merge-bin \
         -o "${validation_build_dir}/FoloToy-AI-Passport-full.bin"
     python3 tools/verify_firmware.py "${validation_build_dir}"

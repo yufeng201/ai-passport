@@ -8,11 +8,12 @@ from pathlib import Path
 import shutil
 import subprocess
 
-ROOT = Path(__file__).resolve().parents[2]
-SOURCES = [ROOT / 'main/road_rage' / f for f in ('rr_game.c', 'rr_game.h', 'rr_render.c', 'rr_render.h', 'rr_wasm.c', 'rr_sound.c', 'rr_sound.h', 'rr_copy.h')]
-SOURCES += [ROOT / 'assets/fonts/dusk_noto_sc_12.h', ROOT / 'assets/fonts/dusk_noto_sc_subset.otf']
-OUT = ROOT / 'build/road_rage/preview'
-SHELL = ROOT / 'tools/road_rage/preview'
+ROOT = Path(__file__).resolve().parents[3]
+SOURCES = [ROOT / 'main/games/cloudbound' / f for f in ('cb_game.c', 'cb_game.h', 'cb_render.c', 'cb_wasm.c', 'cb_copy.h')]
+SOURCES += [ROOT / 'main/games/common/game_audio.c', ROOT / 'main/games/common/game_audio.h']
+SOURCES += [ROOT / 'assets/fonts/cloudbound_noto_sc_12.h', ROOT / 'assets/fonts/cloudbound_noto_sc_subset.otf']
+OUT = ROOT / 'build/games/cloudbound/preview'
+SHELL = ROOT / 'tools/games/cloudbound/preview'
 
 def digest(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
@@ -22,7 +23,7 @@ def check():
     for name, expected in manifest['files'].items():
         path = ROOT / name if name.startswith(('main/', 'tools/', 'assets/')) else OUT / name
         if digest(path) != expected:
-            raise SystemExit(f'Stale preview: {name}; rebuild with tools/road_rage/build_preview.py')
+            raise SystemExit(f'Stale preview: {name}; rebuild with tools/games/cloudbound/build_preview.py')
     print('Shared-source / Wasm / preview hashes: PASS')
 
 if __name__ == '__main__':
@@ -37,9 +38,9 @@ if __name__ == '__main__':
         if not compiler:
             raise SystemExit('Set WASI_CLANG to a wasm32-capable clang from wasi-sdk.')
         OUT.mkdir(parents=True, exist_ok=True)
-        exports = ('game_init', 'game_input', 'game_tick', 'game_frame', 'game_hash', 'game_phase', 'game_health', 'game_attack', 'game_knockouts', 'game_sound_sample')
+        exports = ('game_init', 'game_edge', 'game_tick', 'game_cancel', 'game_frame', 'game_hash', 'game_phase', 'game_effect', 'game_sound_sample')
         cmd = [compiler, '--target=wasm32', '-O2', '-std=c11', '-Wall', '-Wextra', '-Werror', '-nostdlib',
-               '-fno-builtin', '-I' + str(ROOT / 'assets/fonts'), '-Wl,--no-entry', '-Wl,--export-memory', '-Wl,--initial-memory=262144',
+               '-fno-builtin', '-I' + str(ROOT / 'assets/fonts'), '-I' + str(ROOT / 'main/games/common'), '-Wl,--no-entry', '-Wl,--export-memory', '-Wl,--initial-memory=262144',
                '-Wl,--max-memory=262144', '-Wl,-z,stack-size=16384']
         cmd += [f'-Wl,--export={name}' for name in exports]
         cmd += [str(p) for p in SOURCES if p.suffix == '.c'] + ['-o', str(OUT / 'game.wasm')]
@@ -52,4 +53,4 @@ if __name__ == '__main__':
         version = subprocess.check_output([compiler, '--version'], text=True).splitlines()[0]
         (OUT / 'manifest.json').write_text(json.dumps({'compiler': version, 'files': files}, indent=2) + '\n')
         check()
-        print(f'Preview: {OUT}\nServe: python3 -m http.server 8765 --bind 127.0.0.1 --directory {OUT}')
+        print(f'Preview: {OUT}\nServe: python3 -m http.server 8766 --bind 127.0.0.1 --directory {OUT}')

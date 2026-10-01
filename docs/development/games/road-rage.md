@@ -1,4 +1,4 @@
-<p align="right"><a href="dusk-riders.zh_CN.md">简体中文</a> · <strong>English</strong></p>
+<p align="right"><a href="road-rage.zh_CN.md">简体中文</a> · <strong>English</strong></p>
 
 # Road Rage
 
@@ -24,21 +24,21 @@ Collision damage and lane response remain consistent across stages. Finishing ea
 | DOWN / B (middle key) | Start, optional strike, resume, next stage or retry on RELEASE | Pause/resume; no short action on release |
 | OK / C (outer key) | Right lane / next unlocked stage on PRESS | None |
 
-The two outer keys handle the frequent movement actions. Controls use one key at a time. B attacks immediately on release without waiting for single/double-click classification; repeated taps still respect attack cooldown. The game times press/release edges to emit a long pause once without attacking on release. The title includes the long-B pause hint. Check landscape direction on the actual board; change the mirror direction in `main/road_rage/rr_device.c` if held the opposite way up. The browser maps Left/A, Right/C (D also supported), and B/Space/Enter to the same actions. Pointer cancel/focus loss releases input; focus loss pauses play. Accessible buttons perform their labeled short actions. Audio is off by default in the browser and can be enabled with its audio button; firmware plays quiet action cues when the codec is available.
+The two outer keys handle the frequent movement actions. Controls use one key at a time. B attacks immediately on release without waiting for single/double-click classification; repeated taps still respect attack cooldown. The game times press/release edges to emit a long pause once without attacking on release. The title includes the long-B pause hint. Check landscape direction on the actual board; change the mirror direction in `main/games/road_rage/rr_device.c` if held the opposite way up. The browser maps Left/A, Right/C (D also supported), and B/Space/Enter to the same actions. Pointer cancel/focus loss releases input; focus loss pauses play. Accessible buttons perform their labeled short actions. Audio is off by default in the browser and can be enabled with its audio button; firmware plays quiet action cues when the codec is available.
 
 ## Files and preview
 
-- `main/road_rage/`: portable C model, integer RGB565 renderer, Chinese copy, synthesized sounds, Wasm bridge and ESP-IDF device adapter.
-- `tools/road_rage/preview/`: browser shell with no separate gameplay model.
+- `main/games/road_rage/`: portable C model, integer RGB565 renderer, Chinese copy, synthesized sounds, Wasm bridge and ESP-IDF device adapter.
+- `tools/games/road_rage/preview/`: browser shell with no separate gameplay model.
 - `assets/fonts/`: licensed subset font and generated monochrome glyph atlas. English decorative text uses an original 5 × 7 bitmap alphabet.
-- `tests/test_road_rage.c`: state transitions, 16 complete five-stage campaigns without attacks, release/repeated-tap/long-hold limits, visible-contact and attack-cue regressions, strip boundaries, full/strip render equality and seeded replay.
+- `tests/games/test_road_rage.c`: state transitions, 16 complete five-stage campaigns without attacks, release/repeated-tap/long-hold limits, visible-contact and attack-cue regressions, strip boundaries, full/strip render equality and seeded replay.
 
 Build a standalone Wasm module with a wasm32-capable clang (tested with wasi-sdk 34.0; the build script discovers `build/toolchains/wasi-sdk-*/bin/clang` or accepts `WASI_CLANG`):
 
 ```bash
-python3 tools/road_rage/build_preview.py
-./tools/road_rage/check.sh
-python3 -m http.server 8765 --bind 127.0.0.1 --directory build/road_rage/preview
+python3 tools/games/road_rage/build_preview.py
+./tools/games/road_rage/check.sh
+python3 -m http.server 8765 --bind 127.0.0.1 --directory build/games/road_rage/preview
 ```
 
 Open [the local preview](http://127.0.0.1:8765). The build generates a manifest binding the C sources, font assets, shell and Wasm bytes; `--check` rejects stale files. `check.sh` requires a native C compiler, Python 3 and Node.js (tested with Node 22). It compares 21 logical-state and RGB565 frame checkpoints over 1,400 identical native/Wasm steps. Preview output stays under ignored `build/`. On a macOS host with incompatible default SDK/linker versions, activate a matching Xcode SDK via `SDKROOT` for native checks; do not change system defaults.

@@ -1,5 +1,5 @@
 #include "rr_render.h"
-#include "rr_sound.h"
+#include "game_audio.h"
 #include "rr_controls.h"
 #include "bsp_display.h"
 #include "bsp_button.h"
@@ -56,15 +56,15 @@ static void button_event(bsp_btn_t key, bsp_btn_ev_t event, void *user)
 static void sound_worker(void *arg)
 {
     (void)arg;
-    bool ready = bsp_audio_init() == ESP_OK && bsp_audio_set_format(RR_SOUND_HZ,16,1) == ESP_OK;
+    bool ready = bsp_audio_init() == ESP_OK && bsp_audio_set_format(GAME_AUDIO_HZ,16,1) == ESP_OK;
     if (ready) bsp_audio_set_volume(25);
     else ESP_LOGW(TAG,"Audio unavailable; continuing silently");
     int16_t pcm[160];
     for (;;) {
         int effect;
         if (xQueueReceive(sounds,&effect,portMAX_DELAY) != pdTRUE || !ready) continue;
-        for (unsigned start = 0; start < RR_SOUND_SAMPLES; start += 160) {
-            for (unsigned i = 0; i < 160; ++i) pcm[i] = rr_sound_sample(effect,start+i);
+        for (unsigned start = 0; start < GAME_AUDIO_SAMPLES; start += 160) {
+            for (unsigned i = 0; i < 160; ++i) pcm[i] = game_audio_sample(effect,start+i);
             if (bsp_audio_write(pcm,sizeof(pcm)) != ESP_OK) {
                 ready = false; ESP_LOGW(TAG,"Audio write failed; continuing silently"); break;
             }

@@ -47,6 +47,7 @@
 | --- | --- |
 | 使用设备、体验官方玩法 | [快速上手](https://ai-passport.folotoy.cn/guides/getting-started/) · [官方玩法](https://ai-passport.folotoy.cn/plays/) |
 | 让 AI 开发自定义应用 | [Agent 规范](../AGENTS.zh_CN.md) · [AI 开发指南](development/ai-guide.zh_CN.md) · [必需技能](../skills/README.zh_CN.md) |
+| 设计横屏三键游戏 | [游戏目录与构建](development/games/README.zh_CN.md) · [五款游戏方案](development/games/design.zh_CN.md) |
 | 准备环境、编译固件 | [环境准备](development/engineering/environment-setup.zh_CN.md) · [构建与测试](development/engineering/build-and-test.zh_CN.md) |
 | 了解硬件、参与贡献 | [硬件指南](hardware-design/AI_HARDWARE_DEVELOPMENT_GUIDE.zh_CN.md) · [贡献指南](../.github/CONTRIBUTING.zh_CN.md) |
 

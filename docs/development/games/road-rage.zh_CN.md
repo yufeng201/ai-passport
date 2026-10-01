@@ -1,4 +1,4 @@
-<p align="right"><strong>简体中文</strong> · <a href="dusk-riders.md">English</a></p>
+<p align="right"><strong>简体中文</strong> · <a href="road-rage.md">English</a></p>
 
 # 狂飙骑手
 
@@ -24,21 +24,21 @@ AI Passport 上的独立离线摩托竞速与打斗游戏：320 × 240 横屏、
 | DOWN / B（中间） | 松开后开始、可选攻击、继续、下一关或重试 | 暂停／继续，松手不再触发短操作 |
 | OK / C（外侧） | 按下即右换道／选择下一个已解锁关卡 | 无 |
 
-最常用的移动由两个外侧按键承担，每次只操作一个按键。B 使用立即释放事件，在松开后攻击，不等待单击／双击窗口；快速连按仍受攻击冷却限制。长按由游戏按下／松开时间判定，暂停只触发一次，松手不会误攻击。标题页显示长按 B 暂停的提示。横屏方向需要真机确认，如果反向握持，在 `main/road_rage/rr_device.c` 修改镜像方向。浏览器使用左方向键/A、右方向键/C（兼容 D）、B/空格/回车；指针取消或失焦释放输入，失焦暂停比赛。键盘激活页面按钮执行对应短操作。浏览器音效默认关闭，可通过音效按钮开启；设备音频可用时播放低音量的操作音效。
+最常用的移动由两个外侧按键承担，每次只操作一个按键。B 使用立即释放事件，在松开后攻击，不等待单击／双击窗口；快速连按仍受攻击冷却限制。长按由游戏按下／松开时间判定，暂停只触发一次，松手不会误攻击。标题页显示长按 B 暂停的提示。横屏方向需要真机确认，如果反向握持，在 `main/games/road_rage/rr_device.c` 修改镜像方向。浏览器使用左方向键/A、右方向键/C（兼容 D）、B/空格/回车；指针取消或失焦释放输入，失焦暂停比赛。键盘激活页面按钮执行对应短操作。浏览器音效默认关闭，可通过音效按钮开启；设备音频可用时播放低音量的操作音效。
 
 ## 文件与试玩
 
-- `main/road_rage/`：可移植 C 游戏模型、整数 RGB565 渲染器、中文文案、合成音效、Wasm 桥接和 ESP-IDF 设备适配。
-- `tools/road_rage/preview/`：浏览器外壳，没有第二套玩法逻辑。
+- `main/games/road_rage/`：可移植 C 游戏模型、整数 RGB565 渲染器、中文文案、合成音效、Wasm 桥接和 ESP-IDF 设备适配。
+- `tools/games/road_rage/preview/`：浏览器外壳，没有第二套玩法逻辑。
 - `assets/fonts/`：有许可的字体子集和生成的单色中文字形；英文装饰使用原创 5 × 7 位图字母。
-- `tests/test_road_rage.c`：状态切换、16 组不攻击的完整五关通关模拟、释放／连按／长按边界、可见接触与攻击提示回归、缓冲边界、整帧与分块画面一致性、固定种子回放。
+- `tests/games/test_road_rage.c`：状态切换、16 组不攻击的完整五关通关模拟、释放／连按／长按边界、可见接触与攻击提示回归、缓冲边界、整帧与分块画面一致性、固定种子回放。
 
 使用支持 wasm32 的 clang 构建独立 Wasm 模块（已用 wasi-sdk 34.0 验证；脚本自动寻找 `build/toolchains/wasi-sdk-*/bin/clang`，也接受 `WASI_CLANG`）：
 
 ```bash
-python3 tools/road_rage/build_preview.py
-./tools/road_rage/check.sh
-python3 -m http.server 8765 --bind 127.0.0.1 --directory build/road_rage/preview
+python3 tools/games/road_rage/build_preview.py
+./tools/games/road_rage/check.sh
+python3 -m http.server 8765 --bind 127.0.0.1 --directory build/games/road_rage/preview
 ```
 
 打开[本地试玩页](http://127.0.0.1:8765)。构建生成关联 C 源码、字体资源、页面和 Wasm 文件的清单；`--check` 拒绝过期文件。`check.sh` 需要原生 C 编译器、Python 3 和 Node.js（已用 Node 22 验证），对比原生 C 与 Wasm 在相同 1,400 步回放中的 21 个状态及 RGB565 画面检查点。生成文件位于已忽略的 `build/`。若 macOS 默认 SDK 与链接器不兼容，可用 `SDKROOT` 为本次原生检查指定匹配的 Xcode SDK，无需修改系统默认配置。

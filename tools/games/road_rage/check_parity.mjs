@@ -1,10 +1,10 @@
 import {readFileSync} from 'node:fs';
 import {execFileSync} from 'node:child_process';
 import assert from 'node:assert/strict';
-const root=new URL('../../',import.meta.url).pathname;
-const native=process.argv[2]||`${root}build/road_rage/test_game_plain`;
+const root=new URL('../../../',import.meta.url).pathname;
+const native=process.argv[2]||`${root}build/games/road_rage/test_game_plain`;
 const expected=execFileSync(native,['replay'],{encoding:'utf8'}).trim().split('\n');
-const {instance}=await WebAssembly.instantiate(readFileSync(`${root}build/road_rage/preview/game.wasm`),{});
+const {instance}=await WebAssembly.instantiate(readFileSync(`${root}build/games/road_rage/preview/game.wasm`),{});
 const api=instance.exports;api.game_init(0xD057);const actual=[];
 for(let i=0;i<1400;i++){
   if(i===1||i%61===0)api.game_input(2);

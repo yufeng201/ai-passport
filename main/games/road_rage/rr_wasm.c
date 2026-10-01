@@ -1,5 +1,5 @@
 #include "rr_render.h"
-#include "rr_sound.h"
+#include "game_audio.h"
 static rr_game_t game;
 /* Browser-only full framebuffer; excluded from the firmware source list. */
 static uint16_t frame[RR_WIDTH * RR_HEIGHT];
@@ -13,4 +13,4 @@ int game_phase(void) { return game.phase; }
 int game_health(void) { return game.health; }
 int game_attack(void) { return game.attack_ms; }
 int game_knockouts(void) { return game.knockouts; }
-int game_sound_sample(int effect, unsigned sample) { return rr_sound_sample(effect, sample); }
+int game_sound_sample(int effect, unsigned sample) { return game_audio_sample(effect, sample); }

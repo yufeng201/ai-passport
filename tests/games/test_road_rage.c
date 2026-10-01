@@ -1,6 +1,6 @@
 #include "rr_game.h"
 #include "rr_render.h"
-#include "rr_sound.h"
+#include "game_audio.h"
 #include "rr_controls.h"
 #include <assert.h>
 #include <stdio.h>
@@ -42,7 +42,7 @@ static void logic_tests(void)
     g.battery=72;rr_input(&g,RR_HOME);assert(g.phase == RR_TITLE && g.battery == 72);
     rr_input(&g,RR_ACTION);before=g.elapsed_ms;rr_tick(&g,100000);
     assert(g.elapsed_ms-before == 240); /* stalled clocks have bounded catch-up */
-    assert(rr_sound_sample(1,3200)==0 && rr_sound_sample(0,20)==0);
+    assert(game_audio_sample(1,3200)==0 && game_audio_sample(0,20)==0);
 }
 
 /* Regressions for immediate release, repeated taps and long holds. */

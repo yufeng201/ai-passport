@@ -15,8 +15,10 @@
 - 添加字库前评估 Flash 与内部 RAM 影响；ESP32-C3 无 PSRAM。
 - 不提交许可不允许分发的字库。
 
-- `fonts/dusk_noto_sc_subset.otf`：[Noto Sans CJK SC Regular](https://github.com/notofonts/noto-cjk/tree/main/Sans) 的 108 字子集，使用 [SIL OFL 1.1](fonts/OFL.txt) 许可。保留用于重现转换，不链接进固件。
-- `fonts/dusk_noto_sc_12.h`：生成的 12px 单色中文字形，每格 12 × 14，Flash 字形记录约 3 KiB。共享游戏渲染器直接使用，无 LVGL 字体池或运行时解码。文案和字形覆盖检查：`python3 tools/road_rage/generate_font.py --check`；重生成：`python3 tools/road_rage/generate_font.py`（Pillow 12.2.0）。字符清单为 `main/road_rage/rr_copy.h`。新增用字需用 `--source <完整源字体.otf>` 重建 OTF 子集（fonttools 4.62.1），然后重新构建预览与固件。
+- `fonts/road_rage_noto_sc_subset.otf`：[Noto Sans CJK SC Regular](https://github.com/notofonts/noto-cjk/tree/main/Sans) 的 108 字子集，使用 [SIL OFL 1.1](fonts/OFL.txt) 许可。保留用于重现转换，不链接进固件。
+- `fonts/road_rage_noto_sc_12.h`：生成的 12px 单色中文字形，每格 12 × 14，Flash 字形记录约 3 KiB。共享游戏渲染器直接使用，无 LVGL 字体池或运行时解码。文案和字形覆盖检查：`python3 tools/games/road_rage/generate_font.py --check`；重生成：`python3 tools/games/road_rage/generate_font.py`（Pillow 12.2.0）。字符清单为 `main/games/road_rage/rr_copy.h`。新增用字需用 `--source <完整源字体.otf>` 重建 OTF 子集（fonttools 4.62.1），然后重新构建预览与固件。
+
+- `fonts/cloudbound_noto_sc_subset.otf` 与 `fonts/cloudbound_noto_sc_12.h`：云间一跃的 88 字 Noto Sans CJK SC 子集和 12px 位图字形，Flash 字形记录 2,640 字节，遵守 [SIL OFL](fonts/OFL.txt)。文案清单为 `main/games/cloudbound/cb_copy.h`；生成／检查：`python3 tools/games/cloudbound/generate_font.py [--check]`。重建子集需要 `--source <完整源字体.otf>`、Pillow 12.2.0 与 fonttools 4.62.1。OTF 不链接到固件。
 
 ## 图片（images）
 
@@ -44,3 +46,5 @@
 - 无再分发许可不提交媒体文件。
 
 - `images/road-rage-cover.png`：《狂飙骑手》的竖版 3:4 像素风封面，使用内置 imagegen 工具生成。图片标注为封面插画，不是实机截图。
+
+- `images/cloudbound-cover.png`：1086 × 1448 RGB PNG，《云间一跃》的竖版 3:4 封面。2026-10-01 使用内置 imagegen 工具生成，已确认任务完成并查看实际上传文件。标注“示意图 · ILLUSTRATION”，不是实机截图，不嵌入固件。生成提示：精美像素画，戴青色围巾的白色方块角色跃过草顶浮岛，背景包含云海、晚霞、星空和极光，标题为“云间一跃 / CLOUDBOUND”，带示意图标注。
