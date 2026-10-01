@@ -75,6 +75,11 @@ run_static_checks() {
         -o "${test_dir}/test_cloudbound"
     "${test_dir}/test_cloudbound"
     python3 tools/games/cloudbound/generate_font.py --check
+    "${CC:-cc}" -std=c11 -Wall -Wextra -Werror -Imain/games/starport_gunner -Iassets/fonts \
+        tests/games/test_starport_gunner.c main/games/starport_gunner/sg_game.c main/games/starport_gunner/sg_render.c \
+        -o "${test_dir}/test_starport_gunner"
+    "${test_dir}/test_starport_gunner"
+    python3 tools/games/starport_gunner/generate_font.py --check
     PYTHONDONTWRITEBYTECODE=1 python3 tests/test_deep_sleep_contract.py
     PYTHONDONTWRITEBYTECODE=1 python3 tests/test_check_repo.py
     PYTHONDONTWRITEBYTECODE=1 python3 tests/test_verify_firmware.py

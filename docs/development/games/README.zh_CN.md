@@ -14,6 +14,7 @@ main/
     common/                      游戏公共能力
       game_audio.c/.h            有界合成音效
       game_runtime.c/.h          显示、输入、音频与进度保存
+    starport_gunner/              防守射击游戏与构建清单
     cloudbound/                  蓄力跳跃游戏与构建清单
     road_rage/
       game.cmake                 固件源码与依赖清单
@@ -33,7 +34,7 @@ build/games/<game>/               已忽略的预览与开发产物
 build/firmware/<sha256>/         已校验的固件和调试归档
 ```
 
-狂飙骑手与云间一跃各自拥有独立构建清单。后续新游戏分别使用 `starport_gunner/`、`alley_ninja/`、`brick_workshop/`、`clockwork_maze/` 目录，完成时增加对应工具和测试。未完成的游戏不注册构建，也不在另一款固件中分配状态。公共抽象由实际复用需求推动，具体计时规则和玩法留在各自模块。
+狂飙骑手、云间一跃与星港炮手各自拥有独立构建清单。后续新游戏分别使用 `alley_ninja/`、`brick_workshop/`、`clockwork_maze/` 目录，完成时增加对应工具和测试。未完成的游戏不注册构建，也不在另一款固件中分配状态。公共抽象由实际复用需求推动，具体计时规则和玩法留在各自模块。
 
 ## 选择构建
 
@@ -52,3 +53,4 @@ PASSPORT_GAME=road_rage ./tools/validate.sh
 - [云间一跃](cloudbound.zh_CN.md)：五关蓄力跳跃游戏。
 - [狂飙骑手](road-rage.zh_CN.md)：已交付的摩托竞速与对抗游戏。
 - [五款新游戏设计](design.zh_CN.md)：开发顺序、按键、画风、难度与验收目标。
+- [星港炮手](starport-gunner.zh_CN.md)：五关防守射击游戏。

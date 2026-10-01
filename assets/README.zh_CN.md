@@ -48,3 +48,5 @@
 - `images/road-rage-cover.png`：《狂飙骑手》的竖版 3:4 像素风封面，使用内置 imagegen 工具生成。图片标注为封面插画，不是实机截图。
 
 - `images/cloudbound-cover.png`：1086 × 1448 RGB PNG，《云间一跃》的竖版 3:4 封面。2026-10-01 使用内置 imagegen 工具生成，已确认任务完成并查看实际上传文件。标注“示意图 · ILLUSTRATION”，不是实机截图，不嵌入固件。生成提示：精美像素画，戴青色围巾的白色方块角色跃过草顶浮岛，背景包含云海、晚霞、星空和极光，标题为“云间一跃 / CLOUDBOUND”，带示意图标注。
+
+- `fonts/starport_gunner_noto_sc_subset.otf` 与 `fonts/starport_gunner_noto_sc_12.h`：星港炮手的 76 字 Noto Sans CJK SC 子集和 12px 位图字形（2280 字节），遵守 [SIL OFL](fonts/OFL.txt)。文案为 `main/games/starport_gunner/sg_copy.h`，生成／检查为 `python3 tools/games/starport_gunner/generate_font.py [--check]`，OTF 不嵌入固件。
