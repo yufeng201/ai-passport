@@ -166,7 +166,12 @@ static void hud(canvas_t *c,const an_game_t *g){
     panel(c,116,50,118,5,RGB(45,54,78));panel(c,116,50,118*g->stamina/100,5,g->stamina>=24?TEAL:RED);
     if(g->riposte_ms>0){center(c,65,AN_RIPOSTE,1,GOLD);number(c,244,68,g->combo,1,GOLD);}
     if(g->feedback_ms>0)center(c,102,an_feedback[g->feedback],1,g->feedback==1?GOLD:g->feedback>=6?RED:CREAM);
-    panel(c,32,215,256,21,INK);center(c,218,g->guarding?AN_GUARD:g->broken_ms>0?AN_BROKEN:AN_READY,1,CREAM);
+    const char *hint=g->guarding?AN_GUARD:g->broken_ms>0?AN_BROKEN:AN_READY;
+    if(g->stage==1&&g->kills<2&&g->broken_ms==0&&g->enemy.active){
+        if(g->enemy.vulnerable_ms>0)hint=g->enemy.side<0?AN_LEFT_HINT:AN_RIGHT_HINT;
+        else if(g->enemy.phase==AN_WINDUP&&!g->guarding)hint=AN_TUTORIAL;
+    }
+    panel(c,32,215,256,21,INK);center(c,218,hint,1,CREAM);
 }
 static void overlay(canvas_t *c,const an_game_t *g){
     if(g->phase==AN_TITLE){

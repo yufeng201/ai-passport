@@ -34,3 +34,7 @@
 #define AN_STAMINA "体力"
 static const char *const an_stage_names[]={"初入夜巷","两侧来袭","铁甲试炼","错拍街区","影卫决战"};
 static const char *const an_feedback[]={"",AN_PERFECT,AN_BLOCK,AN_ARMOR,AN_MISS,AN_HIT,AN_HURT,AN_BROKEN};
+
+#define AN_TUTORIAL "红条预警 按住 B 格挡"
+#define AN_LEFT_HINT "松 B 按 A 左斩"
+#define AN_RIGHT_HINT "松 B 按 C 右斩"

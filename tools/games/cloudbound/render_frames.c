@@ -16,5 +16,7 @@ int main(void){
         snprintf(path,sizeof(path),"build/games/cloudbound/stage%d-state%d.ppm",stage,state);
         if(!save(&g,path))return 1;
     }
+    cb_init(&g,0,0xC10D);g.stage=3;cb_start(&g);g.phase=CB_PLAY;g.charging=0;g.flying=1;g.flight_ms=260;g.x=160;g.y=104;g.scene_ms=3500;g.score=900;g.landings=5;g.combo=3;g.feedback_ms=450;
+    if(!save(&g,"build/games/cloudbound/promo.ppm"))return 1;
     return 0;
 }

@@ -26,3 +26,6 @@
 #define RP_SAVED "检查点已记录"
 #define RP_RESPAWN "已收集奖励保留"
 static const char *const rp_stage_names[]={"清晨天台","错落街区","尖角试炼","流光机关","日出长廊"};
+
+#define RP_TUTORIAL "按住 B 向右 靠近亮边"
+#define RP_AIR_HINT "空中 A/B 调整方向"

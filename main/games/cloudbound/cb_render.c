@@ -188,7 +188,7 @@ static void hud(canvas_t *c,const cb_game_t *g){
     panel(c,32,196,256,37,INK);
     if(g->charging){
         panel(c,45,202,230,6,RGB(46,66,87));panel(c,45,202,230*g->charge_ms/CB_CHARGE_MAX,6,g->charge_ms>=CB_CHARGE_MAX?GOLD:TEAL);
-        center(c,214,g->charge_ms>=CB_CHARGE_MAX?CB_CAPPED:CB_CONTROL,1,CREAM);
+        center(c,214,g->stage==1&&g->landings<3?(cb_can_land(g,g->charge_ms)?CB_RELEASE_HINT:CB_TUTORIAL):g->charge_ms>=CB_CHARGE_MAX?CB_CAPPED:CB_CONTROL,1,CREAM);
     }else center(c,200,g->flying?CB_FLYING:g->scroll_ms?CB_SCROLL:CB_READY,1,CREAM);
     if(!g->charging)center(c,217,CB_PAUSE_HINT,1,RGB(160,186,199));
 }

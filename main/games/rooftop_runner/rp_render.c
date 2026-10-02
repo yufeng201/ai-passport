@@ -147,7 +147,12 @@ static void hud(canvas_t *c,const rp_game_t *g){
     if(g->phase!=RP_PLAY)return;
     if(g->feedback_ms>0){panel(c,77,53,166,21,INK);center(c,57,RP_SAVED,1,TEAL);}
     else if(g->stage<=2&&g->grounded&&g->platform<11&&g->x/RP_Q>g->platforms[g->platform].x+g->platforms[g->platform].w-38){panel(c,87,53,146,21,INK);center(c,57,RP_JUMP_HINT,1,GOLD);}
-    panel(c,32,211,256,29,INK);center(c,212,RP_ACTION,1,CREAM);center(c,225,RP_PAUSE,1,RGB(157,184,202));
+    const char *hint=RP_PAUSE;
+    if(g->stage==1&&g->furthest<2){
+        if(!g->grounded)hint=RP_AIR_HINT;
+        else hint=g->x/RP_Q>g->platforms[g->platform].x+g->platforms[g->platform].w-38?RP_JUMP_HINT:RP_TUTORIAL;
+    }
+    panel(c,32,211,256,29,INK);center(c,212,RP_ACTION,1,CREAM);center(c,225,hint,1,RGB(157,184,202));
 }
 static void overlay(canvas_t *c,const rp_game_t *g){
     if(g->phase==RP_TITLE){

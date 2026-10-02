@@ -33,5 +33,9 @@ int main(void)
     g.phase=RR_FINISHED;g.score=2680;g.knockouts=8;g.overtakes=15;g.metres_mm=RR_FINISH_METRES*1000;
     save(&g,"build/games/road_rage/finish.ppm");
     g.phase=RR_WRECKED;g.health=0;save(&g,"build/games/road_rage/wreck.ppm");
+    g.phase=RR_RACING;g.stage=1;g.hurt_ms=0;g.lane=0;g.lane_q8=0;g.elapsed_ms=12000;g.attack_ms=160;g.attack_side=1;g.boost_ms=2200;g.chain=3;g.speed=95;g.health=90;g.metres_mm=700000;
+    g.entities[0]=(rr_entity_t){.active=1,.lane=1,.depth=940,.color=1};
+    g.entities[1]=(rr_entity_t){.active=1,.lane=-1,.depth=550,.car=1};
+    save(&g,"build/games/road_rage/promo.ppm");
     return 0;
 }

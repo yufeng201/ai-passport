@@ -27,3 +27,5 @@
 #define BW_ASSIST "弹道导向"
 #define BW_USES "减速"
 static const char *const bw_stage_names[]={"彩窗初光","双层玻璃","反弹支架","流动彩窗","光谱工坊"};
+
+#define BW_TUTORIAL "A 左 C 右 接住光球"

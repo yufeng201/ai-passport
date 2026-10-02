@@ -16,5 +16,8 @@ int main(void){
         snprintf(path,sizeof(path),"build/games/alley_ninja/stage%d-state%d.ppm",stage,state);
         if(!save(&g,path))return 1;
     }
+    an_init(&g,0,0xA11E);g.stage=2;an_start(&g);g.phase=AN_PLAY;g.scene_ms=3500;g.guarding=0;g.stamina=72;g.riposte_ms=850;g.combo=2;g.feedback=1;g.feedback_ms=450;g.slash_ms=160;g.slash_side=1;
+    g.enemy=(an_enemy_t){.active=1,.x=196,.side=1,.hp=2,.max_hp=2,.kind=1,.phase=AN_RECOVER,.timer_ms=400,.vulnerable_ms=600};
+    if(!save(&g,"build/games/alley_ninja/promo.ppm"))return 1;
     return 0;
 }

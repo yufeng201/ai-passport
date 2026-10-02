@@ -151,7 +151,7 @@ static void hud(canvas_t *c,const bw_game_t *g){
     else if(g->assist_ms>0)center(c,150,BW_ASSIST,1,GOLD);
     panel(c,245,185,48,3,INK);panel(c,245,185,48*(g->destroyed%6)/6,3,GOLD);
     panel(c,32,217,256,20,INK);
-    center(c,219,g->ready?BW_READY:g->slow_ms>0?BW_SLOW:g->slow_uses>0?BW_ACTION:BW_EMPTY,1,CREAM);
+    center(c,219,g->ready?BW_READY:g->slow_ms>0?BW_SLOW:g->stage==1&&g->destroyed<2?BW_TUTORIAL:g->slow_uses>0?BW_ACTION:BW_EMPTY,1,CREAM);
     if(g->slow_ms>0)panel(c,74,236,172*g->slow_ms/3000,1,TEAL);
 }
 static void overlay(canvas_t *c,const bw_game_t *g){

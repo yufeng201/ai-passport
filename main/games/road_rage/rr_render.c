@@ -275,6 +275,7 @@ static void hud(canvas_t *c, const rr_game_t *g)
     panel(c,254,57,40,2,RGB(58,52,70));
     panel(c,254,57,(450-g->cooldown_ms)*40/450,2,TEAL);
     if(g->boost_ms>0){panel(c,96,77,128,19,INK);ztext(c,130,79,RR_BOOST,1,GOLD);panel(c,102,94,116*g->boost_ms/3000,2,TEAL);}
+    if(g->stage==1&&g->elapsed_ms<6000&&g->phase==RR_RACING){panel(c,29,207,262,19,INK);ztext(c,34,209,RR_TUTORIAL,1,CREAM);}
     panel(c,22,38,50,20,INK);
     number(c,28,41,g->stage,2,GOLD); text(c,42,48,"/5",1,CREAM);
     if (g->elapsed_ms < 4000 && g->phase == RR_RACING) {

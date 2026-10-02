@@ -48,3 +48,5 @@
 
 #define RR_TEXT_COOLDOWN "B 冷却"
 #define RR_TEXT_READY "B 就绪"
+
+#define RR_TUTORIAL "A 左 C 右 躲车 B 攻击可选"

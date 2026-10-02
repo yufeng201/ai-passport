@@ -17,5 +17,8 @@ int main(void){
         if(!save(&g,path))return 1;
     }
     bw_init(&g,0,1);if(!save(&g,"build/games/brick_workshop/title-initial.ppm"))return 1;
+    bw_init(&g,0,0xA11E);g.stage=3;bw_start(&g);g.phase=BW_PLAY;g.ready=0;g.ball_x=240*BW_Q;g.ball_y=103*BW_Q;g.vx=3*BW_Q;g.vy=3*BW_Q;g.paddle_x=215;g.destroyed=6;g.supply_ms=900;g.flash_ms=100;g.flash_x=240;g.flash_y=62;g.score=450;
+    for(int i=0;i<6;i++)g.bricks[i].hp=0;g.remaining-=6;
+    if(!save(&g,"build/games/brick_workshop/promo.ppm"))return 1;
     return 0;
 }

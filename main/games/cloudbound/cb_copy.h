@@ -31,3 +31,6 @@ static const char *const cb_stage_names[]={"晨雾初行","晴空漫步","晚霞
 #define CB_RESCUE "短 A 救援一次  短 B 重来"
 #define CB_FLYING "跃过云海"
 #define CB_SCROLL "站稳脚步 准备下一跃"
+
+#define CB_TUTORIAL "看轨迹 落点进入平台"
+#define CB_RELEASE_HINT "落点合适 松 B 起跳"

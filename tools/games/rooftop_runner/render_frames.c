@@ -21,5 +21,7 @@ int main(void){
     if(!save(&g,"build/games/rooftop_runner/edge-hint.ppm"))return 1;
     g.x=60*RP_Q;g.facing=-1;
     if(!save(&g,"build/games/rooftop_runner/backward-idle.ppm"))return 1;
+    rp_init(&g,0,0xA11E);g.stage=4;rp_start(&g);g.phase=RP_PLAY;g.scene_ms=3500;g.x=(g.platforms[3].x+g.platforms[3].w-10)*RP_Q;g.y=(g.platforms[3].y-55)*RP_Q;g.camera=g.x/RP_Q-170;g.grounded=0;g.platform=-1;g.vx=RP_SPEED;g.furthest=3;g.score=400;
+    if(!save(&g,"build/games/rooftop_runner/promo.ppm"))return 1;
     return 0;
 }
