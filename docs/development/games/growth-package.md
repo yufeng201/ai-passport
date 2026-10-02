@@ -10,7 +10,9 @@ Stage-one hints follow the action without changing physics, difficulty, controls
 
 ## Promotional covers
 
-The five `assets/images/*-promo.png` files are finished portrait 960 x 1280 PNGs. Each shows one native gameplay fixture and one short hook instead of a title-screen collage. They are explicitly labeled renderer previews, not device captures. Reproduce them with:
+The five new smooth non-pixel `assets/images/*-cover-v2.png` illustrations are the primary covers for the arcade and future community updates. They foreground characters, action, lighting and distinctive environments. All five exact files were visually inspected again on 2026-10-02; each is labeled as illustration artwork rather than a device screenshot. Do not use `*-preview.png` contact sheets or `*-promo.png` renderer layouts as the primary cover. Keep those as optional gameplay detail images. Older illustration covers are preserved. The arcade bundle explicitly includes only the five selected covers, even if older preview files remain in the build directory.
+
+The five `assets/images/*-promo.png` files remain 960 x 1280 renderer previews with short gameplay hooks. Regenerate these optional detail images with:
 
 ```bash
 python3 tools/games/render_promotion.py
@@ -25,7 +27,7 @@ python3 tools/games/build_arcade.py --build-games
 python3 -m http.server 8780 --bind 127.0.0.1 --directory build/games/arcade
 ```
 
-Open `http://127.0.0.1:8780/`. The arcade offers five games, clear controls, browser trials, return navigation and links to the five existing community projects. It copies only four public files per game and the five promotional covers. The output has no firmware, authorizations, tokens or build logs. It can be hosted as static files, but this increment does not deploy it. Browser progress lasts only for the current session; the community's approved firmware may differ from the preview. Sound is opt-in. Rounded artwork uses normal browser scaling rather than nearest-neighbor magnification.
+Open `http://127.0.0.1:8780/`. The arcade offers five games, clear controls, browser trials, return navigation and links to the five existing community projects. It copies only four public files per game and the five illustration covers. The output has no firmware, authorizations, tokens or build logs. It can be hosted as static files, but this increment does not deploy it. Browser progress lasts only for the current session; the community's approved firmware may differ from the preview. Sound is opt-in. Rounded artwork uses normal browser scaling rather than nearest-neighbor magnification.
 
 The builder also produces `build/games/pocket-arcade.zip` from explicitly listed public files, excluding QA screenshots and build logs.
 

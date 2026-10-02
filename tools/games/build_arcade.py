@@ -39,17 +39,17 @@ def build(build_games=False):
         (dest / 'index.html').write_text(page)
         with (dest / 'style.css').open('a') as f:
             f.write('\n.arcade-nav{max-width:760px;margin:0 auto;padding:20px 24px 0;display:flex;justify-content:space-between;gap:12px}.arcade-nav a{color:inherit;text-underline-offset:5px}.arcade-nav a:focus-visible{outline:3px solid #e8bc71;outline-offset:4px}\n')
-        cover = game.replace('_', '-') + '-promo.png'
+        cover = game.replace('_', '-') + '-cover-v2.png'
         (OUT / 'images').mkdir(exist_ok=True)
         shutil.copy2(ROOT / 'assets/images' / cover, OUT / 'images' / cover)
-        cards.append(f'''<article class="game-card" id="{game}"><a class="poster" href="games/{game}/" aria-label="试玩{title}"><img src="images/{cover}" alt="{title}玩法绘图预览" width="960" height="1280" loading="lazy"></a><div class="card-copy"><span class="category">{category} / 五关挑战</span><h2>{title}</h2><p>{pitch}</p><p class="controls">{controls}</p><div class="actions"><a class="button" href="games/{game}/">立即试玩 <span aria-hidden="true">↗</span></a><a class="community" href="{community}" target="_blank" rel="noopener">社区详情</a></div></div></article>''')
+        cards.append(f'''<article class="game-card" id="{game}"><a class="poster" href="games/{game}/" aria-label="试玩{title}"><img src="images/{cover}" alt="{title}封面插画，非实机截图" width="1086" height="1448" loading="lazy"></a><div class="card-copy"><span class="category">{category} / 五关挑战</span><h2>{title}</h2><p>{pitch}</p><p class="controls">{controls}</p><div class="actions"><a class="button" href="games/{game}/">立即试玩 <span aria-hidden="true">↗</span></a><a class="community" href="{community}" target="_blank" rel="noopener">社区详情</a></div></div></article>''')
     template = (ROOT / 'tools/games/arcade/index.html').read_text()
     (OUT / 'index.html').write_text(template.replace('<!-- GAME_CARDS -->', '\n'.join(cards)))
     shutil.copy2(ROOT / 'tools/games/arcade/style.css', OUT / 'style.css')
     (OUT / 'manifest.json').write_text(json.dumps({'games': [g[0] for g in GAMES], 'communityProjects': [g[4] for g in GAMES]}, indent=2))
     archive = ROOT / 'build/games/pocket-arcade.zip'
     public_files = [OUT / 'index.html', OUT / 'style.css', OUT / 'manifest.json']
-    public_files += list((OUT / 'images').glob('*-promo.png'))
+    public_files += [OUT / 'images' / (game.replace('_', '-') + '-cover-v2.png') for game, *_ in GAMES]
     for game, *_ in GAMES:
         public_files += [OUT / 'games' / game / name for name in ('index.html', 'style.css', 'game.js', 'game.wasm')]
     with zipfile.ZipFile(archive, 'w', zipfile.ZIP_DEFLATED) as bundle:

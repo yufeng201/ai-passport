@@ -95,6 +95,10 @@ run_static_checks() {
         -o "${test_dir}/test_rooftop_runner"
     "${test_dir}/test_rooftop_runner"
     python3 tools/games/rooftop_runner/generate_font.py --check
+    "${CC:-cc}" -std=c11 -Wall -Wextra -Werror -Imain/games/lava_lift -Iassets/fonts \
+        tests/games/test_lava_lift.c main/games/lava_lift/ll_game.c main/games/lava_lift/ll_render.c \
+        -o "${test_dir}/test_lava_lift"
+    "${test_dir}/test_lava_lift"
     PYTHONDONTWRITEBYTECODE=1 python3 tests/test_deep_sleep_contract.py
     PYTHONDONTWRITEBYTECODE=1 python3 tests/test_check_repo.py
     PYTHONDONTWRITEBYTECODE=1 python3 tests/test_verify_firmware.py

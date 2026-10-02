@@ -61,6 +61,8 @@ Run `./tools/validate.sh --static` for repository/host checks, and `./tools/game
 
 - [Brick Workshop](brick-workshop.md): five stages of paddle bounces and colorful bricks.
 
+- [Lava Lift](lava-lift.md): steer a rising lift through rocks and jump over lava monsters.
+
 - [Rooftop Runner](rooftop-runner.md): five rooftop courses with A forward, B backward and C jump.
 
 Experience-upgrade audit and acceptance criteria: [five-game upgrade](quality-upgrade.md).

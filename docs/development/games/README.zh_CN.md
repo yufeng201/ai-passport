@@ -64,3 +64,5 @@ PASSPORT_GAME=road_rage ./tools/validate.sh
 - [跃影疾行](rooftop-runner.zh_CN.md)：A 前进、B 后退、C 跳跃的五关屋顶跑酷。
 
 体验升级分析与验收标准：[五款游戏升级](quality-upgrade.zh_CN.md)。
+
+- [熔岩升梯](lava-lift.zh_CN.md)：移动上升平台穿过岩壁，跳跃躲避岩浆小怪。

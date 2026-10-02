@@ -73,6 +73,14 @@ The five `images/*-preview.png` files for Road Rage, Cloudbound, Alley Ninja, Br
 
 The five upgraded font subsets use the Medium face from the official [Noto CJK repository](https://github.com/notofonts/noto-cjk/tree/main/Sans/OTF/SimplifiedChinese), under SIL OFL. No system font is redistributed.
 
-## Gameplay promotional covers
+## Gameplay detail previews
 
 The five `images/*-promo.png` files are 960 x 1280 portrait covers, synchronously rendered from native gameplay fixtures and composed with licensed Noto Medium captions. Each is labeled a renderer preview, not a device capture. Source: `tools/games/render_promotion.py`; the exact completed files were visually inspected. They are not embedded in firmware.
+
+Use the five `images/*-cover-v2.png` illustrations as primary covers. `*-preview.png` and `*-promo.png` are optional gameplay detail images; do not substitute them for the illustration covers. All five selected cover files were visually inspected again on 2026-10-02.
+
+## Smooth illustration covers (2026-10-02)
+
+The five `images/*-cover-v2.png` files replace the pixel-art covers in the browser arcade. They are 1086 x 1448 RGB PNGs, exactly 3:4, created using the built-in imagegen tool. Each generation call completed successfully before copying; all five final repository files were opened with the image viewer and inspected for complete artwork, correct titles and illustration labels. Older covers and renderer previews remain available. These promotional images are not embedded in firmware.
+
+Prompt set: cinematic coastal motorcycle overtaking at sunset (Road Rage); a white cuboid adventurer with a teal scarf jumping between floating grass islands (Cloudbound); a teal masked ninja blocking one purple-and-gold opponent in a rainy neon alley (Alley Ninja); a luminous ball shattering jewel-glass bricks above a cyan paddle and one bumper (Brick Workshop); a teal runner with a golden scarf jumping right across city rooftops at dawn (Rooftop Runner). Shared direction: smooth non-pixel illustration, strong foreground action, thumbnail-readable Chinese title and English subtitle, full-bleed portrait, and a visible illustration/non-device-capture label. No screenshots or UI panels.
