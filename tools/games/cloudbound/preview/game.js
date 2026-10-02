@@ -44,10 +44,26 @@ function paint(){
 }
 function loop(time){
   if(!document.hidden&&time-paintAt>=1000/30){paintAt=time;api.game_tick(now());cue(api.game_effect());paint();}
-  requestAnimationFrame(loop);
+  streamMusic();requestAnimationFrame(loop);
 }
 try{
   const response=await fetch('game.wasm');if(!response.ok)throw Error(`HTTP ${response.status}`);
   const {instance}=await WebAssembly.instantiate(await response.arrayBuffer(),{});api=instance.exports;
   epoch=performance.now();api.game_init(0xC10D);loading.remove();paint();requestAnimationFrame(loop);
 }catch(error){loading.textContent=`加载失败：${error.message}。请通过本地 HTTP 服务打开。`;}
+
+let musicAt=0,musicCursor=0,musicNodes=[];
+function streamMusic(){
+  const theme=api?.game_music_theme();
+  if(!sound||audio?.state!=='running'||!theme||document.hidden){
+    for(const node of musicNodes){try{node.stop();}catch{}}musicNodes=[];musicAt=0;return;
+  }
+  musicNodes=musicNodes.filter(n=>n.endAt>audio.currentTime);
+  if(musicAt<audio.currentTime)musicAt=audio.currentTime;
+  for(let count=0;count<4&&musicAt<audio.currentTime+0.12;count++){
+    const buffer=audio.createBuffer(1,1280,16000),data=buffer.getChannelData(0);
+    for(let i=0;i<1280;i++)data[i]=api.game_music(theme,musicCursor++>>>0)/32768;
+    const node=audio.createBufferSource();node.buffer=buffer;node.connect(audio.destination);
+    node.start(musicAt);musicAt+=0.08;node.endAt=musicAt;musicNodes.push(node);
+  }
+}

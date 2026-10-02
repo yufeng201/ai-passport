@@ -1,6 +1,6 @@
 #pragma once
 #include <stdint.h>
-typedef struct { uint32_t best,unlocked,muted; } game_progress_t;
+typedef struct { uint32_t best,unlocked,muted,medals; } game_progress_t;
 typedef struct {
     const char *name;
     void (*init)(uint32_t now);
@@ -12,6 +12,7 @@ typedef struct {
     void (*restore)(const game_progress_t *record);
     void (*progress)(game_progress_t *record);
     int (*effect)(void);
+    int (*music)(void); /* theme, or zero when paused/muted */
 } game_app_t;
 /* One display/input owner for the lifetime of a standalone firmware.
  * All callbacks except audio execute on this owner; no LVGL task is started. */

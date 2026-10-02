@@ -2,7 +2,7 @@
 
 # 横屏三键游戏设计
 
-本方案取代上一版以单键为主的五款方案。单键计时只是其中一种玩法；其余游戏按射击、防守、连续运动和解谜的需要使用三个键。[云间一跃](cloudbound.zh_CN.md)已完成实现与构建验证，[星港炮手](starport-gunner.zh_CN.md)已实现，其余三款待实现；[狂飙骑手](road-rage.zh_CN.md)仍可独立构建。
+本方案取代上一版以单键为主的五款方案。单键计时只是其中一种玩法；其余游戏按射击、防守、连续运动和解谜的需要使用三个键。[云间一跃](cloudbound.zh_CN.md)已完成实现与构建验证，[星港炮手](starport-gunner.zh_CN.md)已实现，[夜巷忍者](alley-ninja.zh_CN.md)已实现，[弹砖工坊](brick-workshop.zh_CN.md)已实现，机关迷城待实现；[狂飙骑手](road-rage.zh_CN.md)仍可独立构建。
 
 ## 公共约定
 

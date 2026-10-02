@@ -12,6 +12,7 @@ ROOT = Path(__file__).resolve().parents[3]
 SOURCES = [ROOT / 'main/games/cloudbound' / f for f in ('cb_game.c', 'cb_game.h', 'cb_render.c', 'cb_wasm.c', 'cb_copy.h')]
 SOURCES += [ROOT / 'main/games/common/game_audio.c', ROOT / 'main/games/common/game_audio.h']
 SOURCES += [ROOT / 'assets/fonts/cloudbound_noto_sc_12.h', ROOT / 'assets/fonts/cloudbound_noto_sc_subset.otf']
+SOURCES += [ROOT / 'main/games/common/game_visual.h', ROOT / 'main/games/common/game_achievements.h']
 OUT = ROOT / 'build/games/cloudbound/preview'
 SHELL = ROOT / 'tools/games/cloudbound/preview'
 
@@ -38,7 +39,7 @@ if __name__ == '__main__':
         if not compiler:
             raise SystemExit('Set WASI_CLANG to a wasm32-capable clang from wasi-sdk.')
         OUT.mkdir(parents=True, exist_ok=True)
-        exports = ('game_init', 'game_edge', 'game_tick', 'game_cancel', 'game_frame', 'game_hash', 'game_phase', 'game_effect', 'game_sound_sample')
+        exports = ('game_init', 'game_edge', 'game_tick', 'game_cancel', 'game_frame', 'game_hash', 'game_phase', 'game_effect', 'game_sound_sample', 'game_music_theme', 'game_music')
         cmd = [compiler, '--target=wasm32', '-O2', '-std=c11', '-Wall', '-Wextra', '-Werror', '-nostdlib',
                '-fno-builtin', '-I' + str(ROOT / 'assets/fonts'), '-I' + str(ROOT / 'main/games/common'), '-Wl,--no-entry', '-Wl,--export-memory', '-Wl,--initial-memory=262144',
                '-Wl,--max-memory=262144', '-Wl,-z,stack-size=16384']

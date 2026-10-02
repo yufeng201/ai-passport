@@ -1,4 +1,5 @@
 #include "rr_render.h"
+#include "../common/game_visual.h"
 #include "rr_copy.h"
 #include "road_rage_noto_sc_12.h"
 #include <stddef.h>
@@ -322,10 +323,12 @@ static void hud(canvas_t *c, const rr_game_t *g)
     else number(c,276,22,g->battery,1,CREAM);
     box(c,34,231,252,3,RGB(31,29,46));
     box(c,34,231,g->metres_mm/1000*252/rr_stage(g)->metres,3,GOLD);
+    for(int i=0;i<3;i++)box(c,27+i*10,63,6,3,i<g->chain?TEAL:RGB(65,77,99));
     box(c,250,38,48,23,INK);
     ztext(c,255,40,g->cooldown_ms ? RR_TEXT_COOLDOWN : RR_TEXT_READY,1,g->cooldown_ms ? RGB(161,167,190) : TEAL);
     box(c,254,57,40,2,RGB(58,52,70));
     box(c,254,57,(450-g->cooldown_ms)*40/450,2,TEAL);
+    if(g->boost_ms>0){box(c,96,77,128,19,INK);ztext(c,130,79,RR_BOOST,1,GOLD);box(c,102,94,116*g->boost_ms/3000,2,TEAL);}
     box(c,22,38,50,20,INK);
     number(c,28,41,g->stage,2,GOLD); text(c,42,48,"/5",1,CREAM);
     if (g->elapsed_ms < 4000 && g->phase == RR_RACING) {
@@ -343,6 +346,7 @@ static void overlay(canvas_t *c, const rr_game_t *g)
 {
     if (g->phase == RR_RACING) return;
     if (g->phase == RR_TITLE) {
+        ztext(c,40,9,g->muted?RR_MUTED:RR_SOUND,1,CREAM);
         box(c,38,27,244,111,INK);
         box(c,42,31,236,1,GOLD); box(c,42,132,236,1,GOLD);
         ztext(c,88,37,RR_TEXT_TITLE,3,CREAM);
@@ -396,6 +400,7 @@ void rr_render_strip(const rr_game_t *g, uint16_t *pixels, int y, int rows)
     }
     if (g->phase != RR_TITLE) hud(&c,g);
     overlay(&c,g);
+    if(g->phase==RR_TITLE)game_visual_medals(pixels,y,rows,102,game_medal_count(g->medals,g->stage),GOLD,RGB(70,83,103));
     /* Match the physical 30px rounded corners in landscape coordinates. */
     for (int yy = y; yy < y+rows; ++yy) {
         int dy = yy < 30 ? 30-yy : yy >= 210 ? yy-209 : 0;

@@ -1,6 +1,6 @@
 const canvas=document.querySelector('canvas'),ctx=canvas.getContext('2d',{alpha:false});
 const loading=document.querySelector('#loading'),buttons=[...document.querySelectorAll('[data-key]')];
-let api,held=null,last=0,paintAt=0,audio=null,sound=false,priorHealth=100,priorAttack=0,priorPhase=0;
+let api,held=null,last=0,paintAt=0,audio=null,sound=false,priorHealth=100,priorAttack=0,priorPhase=0,priorBoost=0;
 const img=ctx.createImageData(320,240);
 function cue(effect){
   if(!sound||!audio||audio.state!=='running')return;
@@ -62,14 +62,30 @@ function paint(){
 function loop(time){
   if(!document.hidden&&time-paintAt>=1000/30){
     const delta=last?Math.min(250,Math.round(time-last)):0;last=time;paintAt=time;api.game_tick(delta);
-    const hp=api.game_health(),attack=api.game_attack(),phase=api.game_phase();
-    if(hp<priorHealth)cue(2);else if(attack>priorAttack)cue(1);else if(phase===1&&priorPhase===0||phase===3&&priorPhase===1)cue(3);
-    priorHealth=hp;priorAttack=attack;priorPhase=phase;paint();
+    const hp=api.game_health(),attack=api.game_attack(),phase=api.game_phase(),boost=api.game_boost();
+    if(hp<priorHealth)cue(2);else if(boost>priorBoost)cue(7);else if(attack>priorAttack)cue(1);else if(phase===1&&priorPhase===0||phase===3&&priorPhase===1)cue(3);
+    priorHealth=hp;priorAttack=attack;priorPhase=phase;priorBoost=boost;paint();
   }
-  requestAnimationFrame(loop);
+  streamMusic();requestAnimationFrame(loop);
 }
 try{
   const response=await fetch('game.wasm');if(!response.ok)throw Error(`HTTP ${response.status}`);
   const {instance}=await WebAssembly.instantiate(await response.arrayBuffer(),{});api=instance.exports;
   api.game_init(0xD057);loading.remove();paint();requestAnimationFrame(loop);
 }catch(error){loading.textContent=`加载失败：${error.message}。请通过本地 HTTP 服务打开。`;console.error(error);}
+
+let musicAt=0,musicCursor=0,musicNodes=[];
+function streamMusic(){
+  const theme=api?.game_music_theme();
+  if(!sound||audio?.state!=='running'||!theme||document.hidden){
+    for(const node of musicNodes){try{node.stop();}catch{}}musicNodes=[];musicAt=0;return;
+  }
+  musicNodes=musicNodes.filter(n=>n.endAt>audio.currentTime);
+  if(musicAt<audio.currentTime)musicAt=audio.currentTime;
+  for(let count=0;count<4&&musicAt<audio.currentTime+0.12;count++){
+    const buffer=audio.createBuffer(1,1280,16000),data=buffer.getChannelData(0);
+    for(let i=0;i<1280;i++)data[i]=api.game_music(theme,musicCursor++>>>0)/32768;
+    const node=audio.createBufferSource();node.buffer=buffer;node.connect(audio.destination);
+    node.start(musicAt);musicAt+=0.08;node.endAt=musicAt;musicNodes.push(node);
+  }
+}

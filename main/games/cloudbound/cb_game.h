@@ -1,5 +1,6 @@
 #pragma once
 #include <stdint.h>
+#include "../common/game_achievements.h"
 #define CB_WIDTH 320
 #define CB_HEIGHT 240
 #define CB_STAGES 5
@@ -10,9 +11,11 @@ typedef enum { CB_TITLE, CB_PLAY, CB_PAUSED, CB_CLEAR, CB_FAILED } cb_phase_t;
 typedef struct { int x,y,w,h; } cb_platform_t;
 typedef struct {
     cb_phase_t phase;
+    uint32_t medals;
     uint32_t rng,last_ms,scene_ms,elapsed_ms,accumulator_ms,pressed_ms[3];
     int stage,unlocked,best,score,combo,landings,battery,muted;
     unsigned held,blocked,long_sent;
+    int rescued;
     int charging,charge_ms,flying,flight_ms,jump_dx,jump_rise;
     int x,y,camera,scroll_ms,scroll_dx,feedback_ms,effect;
     cb_platform_t current,target;

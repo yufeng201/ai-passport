@@ -7,6 +7,7 @@ static void phase(cb_game_t *g,cb_phase_t p){g->phase=p;clear_input(g);g->accumu
 static void finish(cb_game_t *g,int won){
     if(g->score>g->best)g->best=g->score;
     if(won&&g->unlocked<=g->stage&&g->stage<CB_STAGES)g->unlocked=g->stage+1;
+    if(won)g->medals=game_medal_record(g->medals,g->stage,1+(!g->rescued)+(g->combo>=3));
     phase(g,won?CB_CLEAR:CB_FAILED);g->effect=won?3:2;
 }
 int cb_jump_distance(int ms){return 32+clamp(ms,100,CB_CHARGE_MAX)*128/CB_CHARGE_MAX;}
@@ -26,10 +27,11 @@ void cb_init(cb_game_t *g,uint32_t now,uint32_t seed){
     *g=(cb_game_t){.phase=CB_TITLE,.rng=seed?seed:1,.last_ms=now,.stage=1,.unlocked=1,.battery=-1};
 }
 void cb_start(cb_game_t *g){
+    uint32_t medals=g->medals;
     int stage=clamp(g->stage,1,CB_STAGES),unlocked=clamp(g->unlocked,1,CB_STAGES);
     uint32_t seed=g->rng,now=g->last_ms;unsigned blocked=g->blocked|g->held;
     int best=g->best,battery=g->battery,muted=g->muted;
-    *g=(cb_game_t){.phase=CB_PLAY,.rng=seed,.last_ms=now,.stage=stage,.unlocked=unlocked,
+    *g=(cb_game_t){.medals=medals,.phase=CB_PLAY,.rng=seed,.last_ms=now,.stage=stage,.unlocked=unlocked,
         .best=best,.battery=battery,.muted=muted,.blocked=blocked,.x=70,.y=170,
         .current={30,170,80,16},.effect=3};
     next_platform(g);
@@ -52,7 +54,7 @@ static void step(cb_game_t *g){
     if(g->x<g->target.x+4||g->x>=g->target.x+g->target.w-4){finish(g,0);return;}
     int precise=ab(g->x-(g->target.x+g->target.w/2))<=8;
     g->landings++;g->combo=precise?g->combo+1:0;g->score+=100+g->combo*20;
-    g->feedback_ms=600;g->effect=1;
+    g->feedback_ms=600;g->effect=precise?5:4;
     if(g->landings>=CB_GOAL){finish(g,1);return;}
     g->scroll_dx=g->x-70;g->scroll_ms=300;g->camera=0;
 }
@@ -95,6 +97,9 @@ void cb_edge(cb_game_t *g,int key,int down,uint32_t now){
         if(key==1)cb_start(g);
         else if(key==0&&g->stage>1)g->stage--;
         else if(key==2&&g->stage<g->unlocked)g->stage++;
+    }else if(g->phase==CB_FAILED&&key==0&&!g->rescued){
+        phase(g,CB_PLAY);g->rescued=1;g->x=70;g->y=g->current.y;
+        g->flying=0;g->flight_ms=0;g->combo=0;g->feedback_ms=600;g->effect=7;
     }else if(g->phase==CB_PAUSED&&key==1){phase(g,CB_PLAY);}
     else if((g->phase==CB_CLEAR||g->phase==CB_FAILED)&&key==1){
         if(g->phase==CB_CLEAR&&g->stage<CB_STAGES)g->stage++;
@@ -111,10 +116,10 @@ void cb_cancel(cb_game_t *g,uint32_t now){
 uint32_t cb_hash(const cb_game_t *g){
     uint32_t h=2166136261u;
 #define HASH(v) do{uint32_t q=(uint32_t)(v);for(int b=0;b<4;++b){h=(h^(q&255))*16777619u;q>>=8;}}while(0)
-    HASH(g->phase);HASH(g->rng);HASH(g->last_ms);HASH(g->scene_ms);HASH(g->elapsed_ms);HASH(g->accumulator_ms);
+    HASH(g->medals);HASH(g->phase);HASH(g->rng);HASH(g->last_ms);HASH(g->scene_ms);HASH(g->elapsed_ms);HASH(g->accumulator_ms);
     for(int i=0;i<3;++i)HASH(g->pressed_ms[i]);
     HASH(g->stage);HASH(g->unlocked);HASH(g->best);HASH(g->score);HASH(g->combo);HASH(g->landings);HASH(g->battery);HASH(g->muted);
-    HASH(g->held);HASH(g->blocked);HASH(g->long_sent);HASH(g->charging);HASH(g->charge_ms);HASH(g->flying);HASH(g->flight_ms);
+    HASH(g->held);HASH(g->blocked);HASH(g->long_sent);HASH(g->rescued);HASH(g->charging);HASH(g->charge_ms);HASH(g->flying);HASH(g->flight_ms);
     HASH(g->jump_dx);HASH(g->jump_rise);HASH(g->x);HASH(g->y);HASH(g->camera);HASH(g->scroll_ms);HASH(g->scroll_dx);HASH(g->feedback_ms);HASH(g->effect);
     HASH(g->current.x);HASH(g->current.y);HASH(g->current.w);HASH(g->current.h);HASH(g->target.x);HASH(g->target.y);HASH(g->target.w);HASH(g->target.h);
 #undef HASH

@@ -12,9 +12,10 @@ static void restore(const game_progress_t *p){
     if(p->best<=1000000)game.best=(int)p->best;
     game.muted=p->muted==1;
 }
-static void progress(game_progress_t *p){*p=(game_progress_t){(uint32_t)game.best,(uint32_t)game.unlocked,(uint32_t)game.muted};}
+static void progress(game_progress_t *p){*p=(game_progress_t){(uint32_t)game.best,(uint32_t)game.unlocked,(uint32_t)game.muted,0};}
 static int effect(void){int value=game.effect;game.effect=0;return value;}
+static int music(void){return game.phase==SG_PLAY&&!game.muted?0:0;}
 void sg_device_run(void){
-    static const game_app_t app={"starport_gunner",init,update,edge,cancel,render,battery,restore,progress,effect};
+    static const game_app_t app={"starport_gunner",init,update,edge,cancel,render,battery,restore,progress,effect,music};
     game_runtime_run(&app);
 }

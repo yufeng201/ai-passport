@@ -50,3 +50,22 @@
 - `images/cloudbound-cover.png`：1086 × 1448 RGB PNG，《云间一跃》的竖版 3:4 封面。2026-10-01 使用内置 imagegen 工具生成，已确认任务完成并查看实际上传文件。标注“示意图 · ILLUSTRATION”，不是实机截图，不嵌入固件。生成提示：精美像素画，戴青色围巾的白色方块角色跃过草顶浮岛，背景包含云海、晚霞、星空和极光，标题为“云间一跃 / CLOUDBOUND”，带示意图标注。
 
 - `fonts/starport_gunner_noto_sc_subset.otf` 与 `fonts/starport_gunner_noto_sc_12.h`：星港炮手的 76 字 Noto Sans CJK SC 子集和 12px 位图字形（2280 字节），遵守 [SIL OFL](fonts/OFL.txt)。文案为 `main/games/starport_gunner/sg_copy.h`，生成／检查为 `python3 tools/games/starport_gunner/generate_font.py [--check]`，OTF 不嵌入固件。
+
+- `fonts/alley_ninja_noto_sc_subset.otf` 与 `fonts/alley_ninja_noto_sc_12.h`：96 个 12px Noto Sans CJK SC 字形（2,880 字节），遵守 [SIL OFL](fonts/OFL.txt)。文案为 `main/games/alley_ninja/an_copy.h`，生成／检查为 `python3 tools/games/alley_ninja/generate_font.py [--check]`。OTF 不嵌入固件。
+
+- `images/alley-ninja-cover.png`：1086 × 1448 RGB PNG，《夜巷忍者》的竖版 3:4 封面。2026-10-01 使用内置 imagegen 工具生成，已确认任务完成并查看实际上传文件。标有示意图，不是实机截图，不嵌入固件。生成提示：精美像素画，青色蒙面忍者格挡一名紫金护甲敌人，雨夜霓虹街巷，标题“夜巷忍者 / ALLEY NINJA”，带示意图标注。
+
+- `fonts/brick_workshop_noto_sc_subset.otf` 与 `fonts/brick_workshop_noto_sc_12.h`：弹砖工坊的 70 字 Noto Sans CJK SC 子集，12px 位图，共 2,100 字节 Flash 字形记录，许可 [SIL OFL](fonts/OFL.txt)。文案清单为 `main/games/brick_workshop/bw_copy.h`；生成和检查：`python3 tools/games/brick_workshop/generate_font.py [--check]`。OTF 不进入固件。
+
+- `images/brick-workshop-cover.png`：弹砖工坊竖版 3:4 封面，1086 × 1448 RGB PNG。2026-10-01 使用内置 imagegen 工具生成，确认任务完成后复制并查看同一份上传文件。提示词：深蓝背景、粉/金/青/蓝玻璃砖、发光球、机械挡板与支架的精美像素工坊，中英文标题并明确标注示意图。属于宣传插画，并非实机截图。SHA256：`6eef5d2e821b85c2c6e7dec37b5c70485958712ca4c784b7c76e13e6fd561b98`。
+
+- `fonts/rooftop_runner_noto_sc_subset.otf` 与 `fonts/rooftop_runner_noto_sc_12.h`：跃影疾行使用的 85 字 Noto Sans CJK SC 子集，12px 位图，共 2,550 字节 Flash 字形记录，许可 [SIL OFL](fonts/OFL.txt)。文案：`main/games/rooftop_runner/rp_copy.h`；生成/检查：`python3 tools/games/rooftop_runner/generate_font.py [--check]`。扩展字符需 `--source <完整字体.otf>`，Pillow 12.2.0 与 fonttools 4.62.1。OTF 不进入固件。
+
+- `images/rooftop-runner-cover.png`：1086 × 1448 PNG，跃影疾行的竖版 3:4 封面。2026-10-01 使用内置 imagegen 工具生成，已确认任务完成，并查看实际复制的上传文件。标注中英文示意图字样，不是实机截图，不嵌入固件。提示词：精美像素风，青色衣服与金色围巾的跑者在日出城市屋顶间向右跳跃，发光奖励、检查点旗帜、少量屋顶障碍、中英文游戏标题和示意图标记。SHA256：`8f198098acad0b885f7e08d6acfa80ba00002b9f7f615ba99958312160b56d34`。
+
+当前五款体验升级字体：狂飙骑手 113 字 / 3,390 字节；云间一跃 93 / 2,790；夜巷忍者 103 / 3,090；弹砖工坊 78 / 2,340；跃影疾行 90 / 2,700。新增勋章与能力文案后，使用有许可的完整 Noto 源字体重新生成。原创循环旋律与七类包络音效实现于 `main/games/common/game_audio.c`，没有使用录制音乐或外部音频素材，在原有的 160 样本工作缓冲中合成。
+
+
+## 五款游戏代码绘图预览
+
+骑手、云间、忍者、弹砖和跑酷五份 `images/*-preview.png` 为 960 × 1280 竖版组合图。使用各游戏原生 C 绘图代码及代表性模型状态同步生成，再用 Pillow 排版；已标注代码绘图预览、非实机截图。实际上传文件已逐一查看，封面单独标注示意图。

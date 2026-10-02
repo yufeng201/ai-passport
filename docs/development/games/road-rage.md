@@ -16,11 +16,11 @@ Finish each stage without losing all armor. Five stages unlock in order, with tr
 | Rainy mountain | 2.2 km | 185 km/h | 950 ms | 30% | Finish within 80 seconds |
 | Final showdown | 2.4 km | 195 km/h | 800 ms | 40% | Finish in the top 3 |
 
-Collision damage and lane response remain consistent across stages. Finishing earns one star, the bonus earns another, and finishing with at least 80 armor earns the third. Bonus completion is never required to advance. Each new stage/retry restores armor. Unlock progress survives return to title but is currently session-only (reset on power cycle).
+Collision damage and lane response remain consistent across stages. Finishing earns one star, the bonus earns another, and finishing with at least 80 armor earns the third. Bonus completion is never required to advance. Each new stage/retry restores armor. Unlock progress, best stage medals and sound settings persist across power cycles when storage is available; storage failure falls back to session progress.
 
 | Physical key | Short action | Long action (500 ms) |
 | --- | --- | --- |
-| UP / A (outer key) | Left lane / previous unlocked stage | Return to title when not racing |
+| UP / A (outer key) | Left lane / previous unlocked stage | Toggle sound on title; return to title when paused or on results |
 | DOWN / B (middle key) | Start, optional strike, resume, next stage or retry on RELEASE | Pause/resume; no short action on release |
 | OK / C (outer key) | Right lane / next unlocked stage on PRESS | None |
 
@@ -63,3 +63,15 @@ Activate ESP-IDF 5.5.3 and run `./tools/validate.sh`. The gate includes the game
 | Memory/input | Target at least 30 KiB free internal heap and 16 KiB largest block; lane response under 100 ms | Board logs and physical timing; B click separately includes release timing |
 
 Performance and memory values are acceptance targets, not measured results. Device logs emit render/transfer time and heap probes every five seconds. Browser counters and offline frame images do not establish physical fluidity. Installing firmware and accepting browser gameplay are separate steps; flashing requires the user's current approval. Merged flashing at 0x0 may reset stored data; follow the repository firmware-layout policy for data-preserving installation. No original-firmware backup is required.
+
+
+## Current five-game upgrade
+
+Added clean-overtake rewards and a three-second speed burst canceled by damage. Added chain/boost cues, looping music and seven short sound cues. Stage unlocks, best medals and sound settings now persist; hold A on the title to toggle sound.
+
+1. Hold the device horizontally; no network setup is needed. Tap B on the title to start, or A/C to select an unlocked course.
+2. Tap A to change left and C to change right. Dodge cars; tap B when the hit marker appears to knock away a nearby rider. Attacking is optional. Clean overtakes can trigger a boost; collisions reset the chain.
+3. Hold B for about half a second to pause and tap B to resume. Hold A while paused or on results to return to the title. Hold A on the title to toggle sound.
+4. After finishing, tap B for the next course; after a crash, tap B to retry. Unlocks and each course’s best medals save automatically.
+
+Current artifact identities and validation limits are recorded in [the batch report](quality-upgrade.md). Older build and device records below describe their original revisions.

@@ -13,4 +13,9 @@ int game_phase(void) { return game.phase; }
 int game_health(void) { return game.health; }
 int game_attack(void) { return game.attack_ms; }
 int game_knockouts(void) { return game.knockouts; }
-int game_sound_sample(int effect, unsigned sample) { return game_audio_sample(effect, sample); }
+int game_sound_sample(int effect, unsigned sample) { return game.muted?0:game_audio_sample(effect, sample); }
+
+int game_boost(void) { return game.boost_ms; }
+
+int game_music_theme(void) { return game.phase==RR_RACING&&!game.muted?1:0; }
+int game_music(unsigned theme,unsigned sample) {return game_music_sample((int)theme,sample);}

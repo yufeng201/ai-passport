@@ -1,4 +1,5 @@
 #include "cb_game.h"
+#include "../common/game_visual.h"
 #include "cb_copy.h"
 #include "cloudbound_noto_sc_12.h"
 #include <stddef.h>
@@ -187,6 +188,9 @@ static void world(canvas_t *c,const cb_game_t *g){
     cb_platform_t current=g->current,target=g->target;int x=g->x,y=g->y;
     if(g->phase==CB_TITLE){current=(cb_platform_t){40,164,70,16};target=(cb_platform_t){174,148,62,16};x=75;y=164;}
     island(c,current,g->camera,g->stage);island(c,target,g->camera,g->stage);
+    int tx=target.x+target.w/2-g->camera;
+    line(c,tx-8,target.y-2,tx+8,target.y-2,2,GOLD);
+    oval(c,tx,target.y-27,5,6,GOLD);box(c,tx-1,target.y-30,2,6,CREAM);
     if(g->phase==CB_PLAY&&g->stage==1&&g->charging){
         int landing=70+cb_jump_distance(g->charge_ms),rise=g->current.y-g->target.y;
         for(int t=60;t<=600;t+=60){int xx=70+cb_jump_distance(g->charge_ms)*t/600;
@@ -231,7 +235,7 @@ static void overlay(canvas_t *c,const cb_game_t *g){
         center(c,72,title,2,CREAM);
         ztext(c,91,105,CB_SCORE,1,CREAM);number(c,147,107,g->score,2,GOLD);
         ztext(c,91,127,CB_BEST,1,CREAM);number(c,147,129,g->best,1,TEAL);
-        center(c,151,g->phase==CB_PAUSED?CB_RESUME:g->phase==CB_CLEAR&&g->stage<5?CB_NEXT:CB_RETRY,1,CREAM);
+        center(c,151,g->phase==CB_PAUSED?CB_RESUME:g->phase==CB_CLEAR&&g->stage<5?CB_NEXT:g->phase==CB_FAILED&&!g->rescued?CB_RESCUE:CB_RETRY,1,CREAM);
         center(c,172,g->phase==CB_PAUSED?CB_EXIT:CB_HOME,1,RGB(172,196,210));
     }
 }
@@ -240,6 +244,11 @@ void cb_render_strip(const cb_game_t *g,uint16_t *pixels,int y,int rows){
     canvas_t c={pixels,y,rows};background(&c,g);world(&c,g);
     if(g->phase!=CB_TITLE)hud(&c,g);
     overlay(&c,g);battery(&c,g);
+    if(g->phase==CB_CLEAR)center(&c,201,CB_MEDAL_GOAL,1,CREAM);
+    if(g->phase==CB_CLEAR)game_visual_medals(pixels,y,rows,143,1+(!g->rescued)+(g->combo>=3),GOLD,RGB(70,83,103));
+    if(g->phase==CB_TITLE)game_visual_medals(pixels,y,rows,111,game_medal_count(g->medals,g->stage),GOLD,RGB(70,83,103));
+    if(g->phase==CB_TITLE)for(int i=0;i<5;i++){box(&c,121+i*17,172,11,3,i+1==g->stage?GOLD:i<g->unlocked?TEAL:RGB(65,77,99));}
+    if(g->phase==CB_PLAY&&g->feedback_ms>0&&!g->rescued)game_visual_burst(pixels,y,rows,g->x-g->camera,g->y-15,600-g->feedback_ms,GOLD);
     for(int yy=y;yy<y+rows;yy++){
         int dy=yy<30?30-yy:yy>=210?yy-209:0;
         if(!dy)continue;

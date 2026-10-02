@@ -54,7 +54,7 @@ Open the [local preview](http://127.0.0.1:8766). B/Space/Enter charges; A/Left a
 
 ## Resources and Acceptance
 
-The model occupies 164 bytes. Device rendering uses two 320 × 40 RGB565 DMA buffers totaling 50 KiB, with no device full-screen buffer or LVGL, Wi-Fi, or BLE initialization. Chinese UI uses 88 glyphs at 12 px, totaling 2,640 bytes of Flash records. The OTF subset is only a generation source and is not linked. Fonts use Noto Sans CJK SC under SIL OFL; ordinary builds need no font-conversion dependencies.
+The model occupies 164 bytes. Device rendering uses two 320 × 40 RGB565 DMA buffers totaling 50 KiB, with no device full-screen buffer or LVGL, Wi-Fi, or BLE initialization. Chinese UI uses 93 glyphs at 12 px, totaling 2,790 bytes of Flash records. The OTF subset is only a generation source and is not linked. Fonts use Noto Sans CJK SC under SIL OFL; ordinary builds need no font-conversion dependencies.
 
 Button callbacks only enqueue. The owner handles logic, storage, and display; audio has an independent task. Input overflow pauses the game. Display transfer failure stops and retains in-flight DMA memory. Storage initialization/write failures fall back to session progress without automatically erasing NVS; audio failures permit silent play.
 
@@ -73,3 +73,16 @@ Verified archive: `build/firmware/1e752c18379241b1ee85ddc66734b16ce5ab693ab24fbc
 full SHA256: 1e752c18379241b1ee85ddc66734b16ce5ab693ab24fbcf8bf092b90100abaf9
 ELF SHA256:  cb7e93c97b6c77ca38abbbfb9b0a9642a21313f43ee48bbe1fa2b30069284dd2
 ```
+
+
+## Current five-game upgrade
+
+Added one rescue per attempt, precision landing markers, three medal goals and persistent medals. Added gentle looping music, precision cues and reward particles; B’s charge-and-release controls are retained.
+
+1. Hold the device horizontally; no network setup is needed. Tap B on the title to start; A/C select an unlocked course.
+2. Hold B to charge and release to jump forward. Judge the gap and aim for the next island’s glowing center to earn consecutive precision bonuses.
+3. After a miss, tap A for one rescue, retaining progress and score but clearing the combo. Tap B to restart.
+4. Hold C to pause, tap B to resume, and hold A while paused to return to the title. Hold A on the title to toggle sound.
+5. Complete twelve landings and tap B for the next course; the fifth can be replayed. Unlocks, best score and stage medals save automatically.
+
+Current artifact identities and validation limits are recorded in [the batch report](quality-upgrade.md). Older build and device records below describe their original revisions.

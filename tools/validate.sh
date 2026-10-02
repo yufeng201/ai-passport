@@ -80,6 +80,21 @@ run_static_checks() {
         -o "${test_dir}/test_starport_gunner"
     "${test_dir}/test_starport_gunner"
     python3 tools/games/starport_gunner/generate_font.py --check
+    "${CC:-cc}" -std=c11 -Wall -Wextra -Werror -Imain/games/alley_ninja -Iassets/fonts \
+        tests/games/test_alley_ninja.c main/games/alley_ninja/an_game.c main/games/alley_ninja/an_render.c \
+        -o "${test_dir}/test_alley_ninja"
+    "${test_dir}/test_alley_ninja"
+    python3 tools/games/alley_ninja/generate_font.py --check
+    "${CC:-cc}" -std=c11 -Wall -Wextra -Werror -Imain/games/brick_workshop -Iassets/fonts \
+        tests/games/test_brick_workshop.c main/games/brick_workshop/bw_game.c main/games/brick_workshop/bw_render.c \
+        -o "${test_dir}/test_brick_workshop"
+    "${test_dir}/test_brick_workshop"
+    python3 tools/games/brick_workshop/generate_font.py --check
+    "${CC:-cc}" -std=c11 -Wall -Wextra -Werror -Imain/games/rooftop_runner -Iassets/fonts \
+        tests/games/test_rooftop_runner.c main/games/rooftop_runner/rp_game.c main/games/rooftop_runner/rp_render.c \
+        -o "${test_dir}/test_rooftop_runner"
+    "${test_dir}/test_rooftop_runner"
+    python3 tools/games/rooftop_runner/generate_font.py --check
     PYTHONDONTWRITEBYTECODE=1 python3 tests/test_deep_sleep_contract.py
     PYTHONDONTWRITEBYTECODE=1 python3 tests/test_check_repo.py
     PYTHONDONTWRITEBYTECODE=1 python3 tests/test_verify_firmware.py

@@ -66,7 +66,8 @@ static void control_tests(void)
 }
 static void geometry_tests(void)
 {
-    rr_game_t g;rr_init(&g,1);rr_input(&g,RR_ACTION);
+    uint32_t m=game_medal_record(0,5,3);assert(m==768&&game_medal_count(m,5)==3);assert(game_medal_record(m,5,1)==m&&game_medal_record(m,0,3)==m&&game_medal_record(m,6,3)==m);
+ rr_game_t g;rr_init(&g,1);rr_input(&g,RR_HOME);assert(g.muted);rr_input(&g,RR_ACTION);assert(g.muted);
     g.elapsed_ms=5000;g.scenery_ms=9600;g.lane=0;g.lane_q8=160;
     g.entities[0]=(rr_entity_t){.active=1,.lane=0,.depth=920};
     rr_tick(&g,20);
@@ -173,8 +174,20 @@ static void replay(void)
     }
 }
 
+static void upgrade_tests(void){
+ uint32_t m=game_medal_record(0,5,3);assert(m==768&&game_medal_count(m,5)==3);assert(game_medal_record(m,5,1)==m&&game_medal_record(m,0,3)==m&&game_medal_record(m,6,3)==m);
+ rr_game_t g;rr_init(&g,1);rr_input(&g,RR_HOME);assert(g.muted);rr_input(&g,RR_ACTION);assert(g.muted);g.lane=-1;g.lane_q8=-256;g.spawn_ms=30000;
+ for(int i=0;i<3;i++){g.entities[0]=(rr_entity_t){.active=1,.lane=1,.depth=1119};rr_tick(&g,20);}
+ assert(g.boost_ms==3000&&g.chain==0&&g.overtakes==3&&g.score==180);
+ rr_input(&g,RR_PAUSE);int boost=g.boost_ms;rr_tick(&g,200);assert(g.boost_ms==boost);
+ rr_input(&g,RR_PAUSE);g.chain=2;g.entities[0]=(rr_entity_t){.active=1,.lane=-1,.depth=1000};rr_tick(&g,20);
+ assert(g.health<100&&g.boost_ms==0&&g.chain==0);
+ for(int theme=1;theme<=5;theme++){long energy=0;for(unsigned n=0;n<16000;n++){int v=game_music_sample(theme,n);assert(v>=-900&&v<=900);energy+=v<0?-v:v;}assert(energy>0);}
+ assert(game_music_sample(0,20)==0&&game_music_sample(6,20)==0);
+ for(int effect=1;effect<=7;effect++){assert(game_audio_sample(effect,0)==0&&game_audio_sample(effect,GAME_AUDIO_SAMPLES-1)==0);int energy=0;for(unsigned n=0;n<GAME_AUDIO_SAMPLES;n++){int v=game_audio_sample(effect,n);assert(v>=-4500&&v<=4500);energy+=v<0?-v:v;}assert(energy>0);}
+}
 int main(int argc,char **argv)
-{
+{upgrade_tests();
     (void)argv;
     if(argc>1){replay();return 0;}
     logic_tests();control_tests();geometry_tests();complete_races();render_tests();

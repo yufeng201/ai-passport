@@ -1,4 +1,7 @@
 #pragma once
+#define RR_SOUND "声音开"
+#define RR_MUTED "静音"
+#define RR_BOOST "连超加速"
 #define RR_TEXT_TITLE "狂飙骑手"
 #define RR_TEXT_SUBTITLE "落日海岸公路"
 #define RR_TEXT_START "按 B 开始竞速"
@@ -36,7 +39,7 @@
 #define RR_TEXT_CHALLENGE5 "奖励 前3名冲线"
 #define RR_TEXT_NEXT "按 B 下一关"
 #define RR_TEXT_ALL_CLEAR "全部通关"
-#define RR_TEXT_STAGE_SELECT "A/C 选关 B 开始"
+#define RR_TEXT_STAGE_SELECT "A/C 选关 长 A 声音"
 #define RR_TEXT_UNLOCKED "已解锁"
 #define RR_TEXT_STAGE_LABEL "关卡"
 #define RR_TEXT_BONUS "额外挑战"

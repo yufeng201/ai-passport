@@ -10,4 +10,7 @@ uint16_t *game_frame(void){cb_render_strip(&game,frame,0,CB_HEIGHT);return frame
 uint32_t game_hash(void){return cb_hash(&game);}
 int game_phase(void){return game.phase;}
 int game_effect(void){int effect=game.effect;game.effect=0;return effect;}
-int game_sound_sample(int effect,unsigned sample){return game_audio_sample(effect,sample);}
+int game_sound_sample(int effect,unsigned sample){return game.muted?0:game_audio_sample(effect,sample);}
+
+int game_music_theme(void) { return game.phase==CB_PLAY&&!game.muted?2:0; }
+int game_music(unsigned theme,unsigned sample) {return game_music_sample((int)theme,sample);}

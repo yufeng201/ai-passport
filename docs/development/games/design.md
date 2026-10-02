@@ -2,7 +2,7 @@
 
 # Landscape Three-Button Game Designs
 
-This proposal replaces the previous predominantly single-button lineup. Timed single-button play is one option; the other games use three buttons for shooting, defense, continuous movement, and puzzles. [Cloudbound](cloudbound.md) has completed implementation and build validation; [Starport Gunner](starport-gunner.md) is implemented; the other three are awaiting implementation. [Road Rage](road-rage.md) remains independently buildable.
+This proposal replaces the previous predominantly single-button lineup. Timed single-button play is one option; the other games use three buttons for shooting, defense, continuous movement, and puzzles. [Cloudbound](cloudbound.md) has completed implementation and build validation; [Starport Gunner](starport-gunner.md) is implemented; [Alley Ninja](alley-ninja.md) is implemented; [Brick Workshop](brick-workshop.md) is implemented; Clockwork Maze awaits implementation. [Road Rage](road-rage.md) remains independently buildable.
 
 ## Shared Conventions
 

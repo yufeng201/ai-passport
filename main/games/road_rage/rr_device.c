@@ -10,6 +10,8 @@
 #include "esp_lcd_panel_io.h"
 #include "esp_log.h"
 #include "esp_timer.h"
+#include "nvs_flash.h"
+#include <stdatomic.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/queue.h"
 #include "freertos/semphr.h"
@@ -52,6 +54,8 @@ static void button_event(bsp_btn_t key, bsp_btn_ev_t event, void *user)
     }
 }
 
+static atomic_int music_theme;
+
 /* Optional audio worker owns all codec writes. Failure degrades to silent play. */
 static void sound_worker(void *arg)
 {
@@ -59,15 +63,22 @@ static void sound_worker(void *arg)
     bool ready = bsp_audio_init() == ESP_OK && bsp_audio_set_format(GAME_AUDIO_HZ,16,1) == ESP_OK;
     if (ready) bsp_audio_set_volume(25);
     else ESP_LOGW(TAG,"Audio unavailable; continuing silently");
-    int16_t pcm[160];
+    int16_t pcm[160];unsigned cursor=GAME_AUDIO_SAMPLES;int active=0;
+    uint32_t music_cursor=0;
     for (;;) {
-        int effect;
-        if (xQueueReceive(sounds,&effect,portMAX_DELAY) != pdTRUE || !ready) continue;
-        for (unsigned start = 0; start < GAME_AUDIO_SAMPLES; start += 160) {
-            for (unsigned i = 0; i < 160; ++i) pcm[i] = game_audio_sample(effect,start+i);
-            if (bsp_audio_write(pcm,sizeof(pcm)) != ESP_OK) {
-                ready = false; ESP_LOGW(TAG,"Audio write failed; continuing silently"); break;
-            }
+        int theme=atomic_load(&music_theme),effect=0;
+        TickType_t timeout=(theme||cursor<GAME_AUDIO_SAMPLES)?0:pdMS_TO_TICKS(50);
+        if(xQueueReceive(sounds,&effect,timeout)==pdTRUE){active=effect;cursor=0;}
+        if(!ready){vTaskDelay(pdMS_TO_TICKS(50));continue;}
+        if(!theme&&cursor>=GAME_AUDIO_SAMPLES)continue;
+        for(unsigned i=0;i<160;i++){
+            int sample=game_music_sample(theme,music_cursor++);
+            if(cursor<GAME_AUDIO_SAMPLES)sample+=game_audio_sample(active,cursor++);
+            pcm[i]=(int16_t)sample;
+        }
+        if(bsp_audio_write(pcm,sizeof(pcm))!=ESP_OK){
+            ready=false;ESP_LOGW(TAG,"Audio write failed; continuing silently");
+            cursor=GAME_AUDIO_SAMPLES;atomic_store(&music_theme,0);
         }
     }
 }
@@ -105,6 +116,7 @@ fail:
  * No LVGL task is initialized. Audio runs in its own bounded worker. */
 void rr_device_run(void)
 {
+    nvs_handle_t storage=0;bool storage_ready=false;
     inputs = xQueueCreate(12,sizeof(key_event_t));
     sounds = xQueueCreate(4,sizeof(int));
     transfer_done = xSemaphoreCreateBinary();
@@ -119,6 +131,13 @@ void rr_device_run(void)
     esp_lcd_panel_io_callbacks_t callbacks = { .on_color_trans_done = color_done };
     if (esp_lcd_panel_io_register_event_callbacks(bsp_display_io(),&callbacks,NULL) != ESP_OK) goto cleanup;
     rr_init(&game,0xD057u);
+    if(nvs_flash_init()==ESP_OK&&nvs_open("road_rage",NVS_READWRITE,&storage)==ESP_OK){
+        storage_ready=true;uint32_t value=0;
+        if(nvs_get_u32(storage,"unlocked",&value)==ESP_OK&&value>=1&&value<=RR_STAGES)game.unlocked=value;
+        if(nvs_get_u32(storage,"medals",&value)==ESP_OK)game.medals=value&1023u;
+        if(nvs_get_u32(storage,"muted",&value)==ESP_OK)game.muted=value==1;
+    }
+    uint32_t saved_medals=game.medals,saved_unlocked=game.unlocked,saved_muted=game.muted;
     bool battery_ready = bsp_battery_init() == ESP_OK;
     if (battery_ready) game.battery = bsp_battery_soc();
     if (bsp_button_init(button_event,NULL) != ESP_OK) {
@@ -132,7 +151,7 @@ void rr_device_run(void)
     int64_t next_probe = previous + 5000000;
     TickType_t wake = xTaskGetTickCount();
     for (;;) {
-        int health = game.health, attack = game.attack_ms;
+        int health = game.health, attack = game.attack_ms,boost=game.boost_ms;
         rr_phase_t phase = game.phase;
         key_event_t message;
         while (xQueueReceive(inputs,&message,0) == pdTRUE) {
@@ -150,10 +169,18 @@ void rr_device_run(void)
         if (battery_ready && now >= next_battery) {
             game.battery = bsp_battery_soc(); next_battery = now+5000000;
         }
-        int effect = game.health < health ? 2 : game.attack_ms > attack ? 1 :
+        atomic_store(&music_theme,game.phase==RR_RACING&&!game.muted?1:0);
+        int effect = game.health < health ? 2 : game.boost_ms>boost ? 7 : game.attack_ms > attack ? 1 :
                      (phase == RR_TITLE && game.phase == RR_RACING) ||
                      (phase == RR_RACING && game.phase == RR_FINISHED) ? 3 : 0;
-        if (effect) xQueueSend(sounds,&effect,0);
+        if (effect&&!game.muted) xQueueSend(sounds,&effect,0);
+        if(game.medals!=saved_medals||game.unlocked!=saved_unlocked||game.muted!=saved_muted){
+            if(storage_ready&&(nvs_set_u32(storage,"medals",game.medals)!=ESP_OK||nvs_set_u32(storage,"unlocked",game.unlocked)!=ESP_OK||nvs_set_u32(storage,"muted",game.muted)!=ESP_OK||nvs_commit(storage)!=ESP_OK)){
+                storage_ready=false;ESP_LOGW(TAG,"Progress write failed; using session progress");
+            }
+            if(game.muted)xQueueReset(sounds);
+            saved_medals=game.medals;saved_unlocked=game.unlocked;saved_muted=game.muted;
+        }
         if (!present()) {
             /* Retain in-flight memory/callback forever after timeout: no unsafe cleanup. */
             bsp_display_backlight(0);
@@ -176,6 +203,7 @@ void rr_device_run(void)
         }
     }
 cleanup:
+    if(storage)nvs_close(storage);
     for(int i=0;i<2;++i)if(strip[i])heap_caps_free(strip[i]);
     if (inputs) vQueueDelete(inputs);
     if (sounds) vQueueDelete(sounds);

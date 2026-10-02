@@ -107,7 +107,14 @@ static void replay(void){
         }
     }
 }
-int main(int argc,char **argv){
+static void upgrade_tests(void){
+ cb_game_t g;cb_init(&g,0,1);cb_start(&g);g.phase=CB_FAILED;g.landings=4;g.score=500;g.combo=2;g.x=250;g.flying=0;
+ cb_edge(&g,0,1,20);cb_edge(&g,0,0,60);
+ assert(g.phase==CB_PLAY&&g.rescued&&g.landings==4&&g.score==500&&g.combo==0&&g.x==70&&g.y==g.current.y);
+ g.phase=CB_FAILED;cb_edge(&g,0,1,80);cb_edge(&g,0,0,120);assert(g.phase==CB_FAILED);
+ cb_edge(&g,1,1,140);cb_edge(&g,1,0,180);assert(g.phase==CB_PLAY&&!g.rescued&&g.landings==0);
+}
+int main(int argc,char **argv){upgrade_tests();
     if(argc>1&&!strcmp(argv[1],"replay")){replay();return 0;}
     input_tests();campaign_tests();geometry_tests();rendering_tests();
     printf("Cloudbound: PASS (64 five-stage campaigns, reachability, input timing, pause/reset, geometry, strips); state=%zu bytes\n",sizeof(cb_game_t));

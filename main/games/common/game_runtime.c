@@ -49,6 +49,8 @@ static void button_event(bsp_btn_t key, bsp_btn_ev_t event, void *user)
     if (xQueueSend(inputs,&message,0)!=pdTRUE) atomic_store(&input_lost,true);
 }
 
+static atomic_int music_theme;
+
 /* Optional audio worker owns all codec writes. Failure degrades to silent play. */
 static void sound_worker(void *arg)
 {
@@ -56,15 +58,22 @@ static void sound_worker(void *arg)
     bool ready = bsp_audio_init() == ESP_OK && bsp_audio_set_format(GAME_AUDIO_HZ,16,1) == ESP_OK;
     if (ready) bsp_audio_set_volume(25);
     else ESP_LOGW(TAG,"Audio unavailable; continuing silently");
-    int16_t pcm[160];
+    int16_t pcm[160];unsigned cursor=GAME_AUDIO_SAMPLES;int active=0;
+    uint32_t music_cursor=0;
     for (;;) {
-        int effect;
-        if (xQueueReceive(sounds,&effect,portMAX_DELAY) != pdTRUE || !ready) continue;
-        for (unsigned start = 0; start < GAME_AUDIO_SAMPLES; start += 160) {
-            for (unsigned i = 0; i < 160; ++i) pcm[i] = game_audio_sample(effect,start+i);
-            if (bsp_audio_write(pcm,sizeof(pcm)) != ESP_OK) {
-                ready = false; ESP_LOGW(TAG,"Audio write failed; continuing silently"); break;
-            }
+        int theme=atomic_load(&music_theme),effect=0;
+        TickType_t timeout=(theme||cursor<GAME_AUDIO_SAMPLES)?0:pdMS_TO_TICKS(50);
+        if(xQueueReceive(sounds,&effect,timeout)==pdTRUE){active=effect;cursor=0;}
+        if(!ready){vTaskDelay(pdMS_TO_TICKS(50));continue;}
+        if(!theme&&cursor>=GAME_AUDIO_SAMPLES)continue;
+        for(unsigned i=0;i<160;i++){
+            int sample=game_music_sample(theme,music_cursor++);
+            if(cursor<GAME_AUDIO_SAMPLES)sample+=game_audio_sample(active,cursor++);
+            pcm[i]=(int16_t)sample;
+        }
+        if(bsp_audio_write(pcm,sizeof(pcm))!=ESP_OK){
+            ready=false;ESP_LOGW(TAG,"Audio write failed; continuing silently");
+            cursor=GAME_AUDIO_SAMPLES;atomic_store(&music_theme,0);
         }
     }
 }
@@ -122,7 +131,10 @@ void game_runtime_run(const game_app_t *app)
     if(nvs_flash_init()==ESP_OK && nvs_open(app->name,NVS_READWRITE,&storage)==ESP_OK)storage_ready=true;
     else ESP_LOGW(TAG,"Progress storage unavailable; using session progress");
     game_progress_t saved={0};size_t saved_size=sizeof(saved);
-    if(storage_ready && nvs_get_blob(storage,"progress",&saved,&saved_size)==ESP_OK && saved_size==sizeof(saved))app->restore(&saved);
+    if(storage_ready && nvs_get_blob(storage,"progress",&saved,&saved_size)==ESP_OK && (saved_size==12||saved_size==sizeof(saved))){
+        uint32_t medals=0;if(nvs_get_u32(storage,"medals",&medals)==ESP_OK)saved.medals=medals&1023u;
+        app->restore(&saved);
+    }
     app->progress(&saved);
     bool battery_ready = bsp_battery_init() == ESP_OK;
     if (battery_ready) app->battery(bsp_battery_soc());
@@ -150,12 +162,13 @@ void game_runtime_run(const game_app_t *app)
         }
         game_progress_t current;app->progress(&current);
         if(memcmp(&saved,&current,sizeof(current))!=0){
-            if(storage_ready && (nvs_set_blob(storage,"progress",&current,sizeof(current))!=ESP_OK || nvs_commit(storage)!=ESP_OK)) {
+            if(storage_ready && (nvs_set_blob(storage,"progress",&current,12)!=ESP_OK || nvs_set_u32(storage,"medals",current.medals)!=ESP_OK || nvs_commit(storage)!=ESP_OK)) {
                 ESP_LOGW(TAG,"Progress write failed; using session progress");storage_ready=false;
             }
             if(current.muted)xQueueReset(sounds);
             saved=current;
         }
+        atomic_store(&music_theme,app->music?app->music():0);
         int effect=app->effect();
         if(effect && !current.muted)xQueueSend(sounds,&effect,0);
         if (!present()) {

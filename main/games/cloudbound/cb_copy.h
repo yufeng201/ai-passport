@@ -1,4 +1,5 @@
 #pragma once
+#define CB_MEDAL_GOAL "通关  无救援  连击三次"
 #define CB_TITLE_TEXT "云间一跃"
 #define CB_SUBTITLE "穿过云海 追逐落日"
 #define CB_START "短按 B 开始"
@@ -27,5 +28,6 @@
 #define CB_SOUND "声音开"
 static const char *const cb_stage_names[]={"晨雾初行","晴空漫步","晚霞窄桥","星夜高台","极光之旅"};
 
+#define CB_RESCUE "短 A 救援一次  短 B 重来"
 #define CB_FLYING "跃过云海"
 #define CB_SCROLL "站稳脚步 准备下一跃"

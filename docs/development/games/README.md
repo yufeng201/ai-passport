@@ -14,6 +14,9 @@ main/
     common/                      reusable game capabilities
       game_audio.c/.h            bounded synthesized audio
       game_runtime.c/.h          display, input, audio, progress storage
+    rooftop_runner/              Three-button rooftop platform runner
+    brick_workshop/              Brick-and-paddle game
+    alley_ninja/                 Guard-and-counter action game
     starport_gunner/              Defense shooter and build manifest
     cloudbound/                  charge-and-jump game and manifest
     road_rage/
@@ -34,7 +37,7 @@ build/games/<game>/               ignored preview and development outputs
 build/firmware/<sha256>/         verified delivery/debug bundles
 ```
 
-Road Rage, Cloudbound and Starport Gunner have independent build manifests. New games will use separate `alley_ninja/`, `brick_workshop/`, and `clockwork_maze/` directories, with matching tools and tests when implemented. Do not register unfinished games or allocate their state in another game's firmware. Add common abstractions when actual use justifies them; game-specific timing and rules stay in their own modules.
+Road Rage, Cloudbound, Starport Gunner, Alley Ninja and Brick Workshop have independent build manifests. The remaining new game will use a separate `clockwork_maze/` directory, with matching tools and tests when implemented. Do not register unfinished games or allocate their state in another game's firmware. Add common abstractions when actual use justifies them; game-specific timing and rules stay in their own modules.
 
 ## Build Selection
 
@@ -54,3 +57,10 @@ Run `./tools/validate.sh --static` for repository/host checks, and `./tools/game
 - [Road Rage](road-rage.md): delivered motorcycle racing and combat game.
 - [Five new game designs](design.md): development order, controls, art, difficulty, and acceptance targets.
 - [Starport Gunner](starport-gunner.md): five-stage defense shooter.
+- [Alley Ninja](alley-ninja.md): five-stage guard-and-counter action game.
+
+- [Brick Workshop](brick-workshop.md): five stages of paddle bounces and colorful bricks.
+
+- [Rooftop Runner](rooftop-runner.md): five rooftop courses with A forward, B backward and C jump.
+
+Experience-upgrade audit and acceptance criteria: [five-game upgrade](quality-upgrade.md).

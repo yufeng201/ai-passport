@@ -84,10 +84,12 @@ int rr_rank(const rr_game_t *g)
 
 void rr_input(rr_game_t *g, rr_input_t input)
 {
+    if (input == RR_HOME && g->phase==RR_TITLE){g->muted=!g->muted;return;}
     if (input == RR_HOME) {
+        uint32_t medals=g->medals;int muted=g->muted;
         int battery = g->battery, stage=g->stage, unlocked=g->unlocked;
         rr_init(g, 0xD057u);
-        g->battery = battery; g->stage=stage; g->unlocked=unlocked;
+        g->muted=muted;g->medals=medals;g->battery = battery; g->stage=stage; g->unlocked=unlocked;
         return;
     }
     if (input == RR_PAUSE) {
@@ -100,10 +102,11 @@ void rr_input(rr_game_t *g, rr_input_t input)
     if (input == RR_ACTION && g->phase != RR_RACING) {
         if (g->phase == RR_PAUSED) g->phase = RR_RACING;
         else {
+            uint32_t medals=g->medals;int muted=g->muted;
             int battery=g->battery,stage=g->stage,unlocked=g->unlocked;
             if(g->phase==RR_FINISHED && stage<RR_STAGES)++stage;
             rr_init(g, 0xD057u+(uint32_t)(stage-1)*7919u);
-            g->battery=battery;g->stage=stage;g->unlocked=unlocked;
+            g->muted=muted;g->medals=medals;g->battery=battery;g->stage=stage;g->unlocked=unlocked;
             g->phase=RR_RACING;
         }
         return;
@@ -152,6 +155,7 @@ static void step(rr_game_t *g)
     g->scenery_ms += 20;
     int target = 100 + (int)(g->elapsed_ms / 350);
     if (target > rr_stage(g)->max_speed) target = rr_stage(g)->max_speed;
+    if(g->boost_ms>0){g->boost_ms-=20;target+=20;}
     if (g->hurt_ms > 0) target = 75;
     if (g->speed < target) ++g->speed;
     if (g->speed > target) --g->speed;
@@ -175,6 +179,7 @@ static void step(rr_game_t *g)
             continue;
         }
         if (rr_contact(g,e) && g->hurt_ms == 0) {
+            g->chain=0;g->boost_ms=0;
             g->health -= e->car ? 30 : 20;
             g->hurt_ms = 1200;
             e->active = 0;
@@ -183,12 +188,14 @@ static void step(rr_game_t *g)
             e->active = 0;
             ++g->overtakes;
             g->score += 40;
+            if(++g->chain>=3){g->chain=0;g->boost_ms=3000;g->score+=60;}
         }
     }
     if (g->phase == RR_RACING && g->metres_mm >= rr_stage(g)->metres * 1000) {
         g->metres_mm = rr_stage(g)->metres * 1000;
         g->phase = RR_FINISHED;
         g->score += g->health * 5;
+        g->medals=game_medal_record(g->medals,g->stage,rr_stars(g));
         if(g->stage<RR_STAGES && g->unlocked<=g->stage)g->unlocked=g->stage+1;
     }
 }
@@ -208,10 +215,10 @@ static void mix(uint32_t *h, uint32_t v)
 uint32_t rr_state_hash(const rr_game_t *g)
 {
     uint32_t h = 2166136261u;
-    const int32_t fields[] = { g->phase, (int32_t)g->rng, (int32_t)g->elapsed_ms,
+    const int32_t fields[] = { (int32_t)g->medals,g->phase, (int32_t)g->rng, (int32_t)g->elapsed_ms,
         (int32_t)g->accumulator_ms, (int32_t)g->scenery_ms, g->metres_mm, g->lane_q8,
         g->health, g->speed, g->score, g->overtakes, g->knockouts, g->attack_ms,
-        g->cooldown_ms, g->hurt_ms, g->spawn_ms, g->battery, g->lane, g->attack_side, g->stage, g->unlocked };
+        g->chain,g->boost_ms,g->cooldown_ms, g->hurt_ms, g->spawn_ms, g->battery, g->lane, g->attack_side, g->stage, g->unlocked,g->muted };
     for (unsigned i = 0; i < sizeof(fields) / sizeof(fields[0]); ++i) mix(&h, (uint32_t)fields[i]);
     for (int i = 0; i < RR_ENTITIES; ++i) {
         const rr_entity_t *e = &g->entities[i];

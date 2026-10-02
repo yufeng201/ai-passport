@@ -1,5 +1,6 @@
 #pragma once
 #include <stdint.h>
+#include "../common/game_achievements.h"
 
 #define RR_WIDTH 320
 #define RR_HEIGHT 240
@@ -17,12 +18,14 @@ typedef struct {
 } rr_entity_t;
 typedef struct {
     rr_phase_t phase;
+    uint32_t medals;
     uint32_t rng, elapsed_ms, accumulator_ms, scenery_ms;
     int32_t metres_mm, lane_q8;
     int16_t health, speed, score, overtakes, knockouts;
+    int16_t chain,boost_ms;
     int16_t attack_ms, cooldown_ms, hurt_ms, spawn_ms, battery;
     int8_t lane, attack_side;
-    uint8_t stage, unlocked;
+    uint8_t stage, unlocked,muted;
     rr_entity_t entities[RR_ENTITIES];
 } rr_game_t;
 
