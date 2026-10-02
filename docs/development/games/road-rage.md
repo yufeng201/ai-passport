@@ -30,7 +30,7 @@ The two outer keys handle the frequent movement actions. Controls use one key at
 
 - `main/games/road_rage/`: portable C model, integer RGB565 renderer, Chinese copy, synthesized sounds, Wasm bridge and ESP-IDF device adapter.
 - `tools/games/road_rage/preview/`: browser shell with no separate gameplay model.
-- `assets/fonts/`: licensed subset font and generated monochrome glyph atlas. English decorative text uses an original 5 × 7 bitmap alphabet.
+- `assets/fonts/`: licensed Noto Sans subset and native-size 4bpp antialiased Chinese/ASCII atlas; the original 5 × 7 alphabet is removed.
 - `tests/games/test_road_rage.c`: state transitions, 16 complete five-stage campaigns without attacks, release/repeated-tap/long-hold limits, visible-contact and attack-cue regressions, strip boundaries, full/strip render equality and seeded replay.
 
 Build a standalone Wasm module with a wasm32-capable clang (tested with wasi-sdk 34.0; the build script discovers `build/toolchains/wasi-sdk-*/bin/clang` or accepts `WASI_CLANG`):
@@ -75,3 +75,8 @@ Added clean-overtake rewards and a three-second speed burst canceled by damage. 
 4. After finishing, tap B for the next course; after a crash, tap B to retry. Unlocks and each course’s best medals save automatically.
 
 Current artifact identities and validation limits are recorded in [the batch report](quality-upgrade.md). Older build and device records below describe their original revisions.
+
+
+## Smooth illustration rendering
+
+Typography now uses Noto Sans Chinese and Latin glyphs rendered separately at each native size, with 4-bit coverage blended into RGB565. Shapes use clipped analytic strokes/ellipses with four coverage samples. Rounded UI panels, curved character silhouettes and vector medals replace deliberately enlarged pixel artwork; Road Rage no longer uses its bitmap motorcycle sprite. No supersampled framebuffer or new per-frame allocation is introduced. Physical resolution and real-device frame time still need acceptance testing. Browser Wasm memory is 512 KiB to accommodate immutable font data and its full preview frame; that does not change device strip memory. Current builds use `smooth-gate.log` and `smooth-receipt.json`; older upgrade receipts describe the prior graphics.

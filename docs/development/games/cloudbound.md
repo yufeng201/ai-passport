@@ -86,3 +86,8 @@ Added one rescue per attempt, precision landing markers, three medal goals and p
 5. Complete twelve landings and tap B for the next course; the fifth can be replayed. Unlocks, best score and stage medals save automatically.
 
 Current artifact identities and validation limits are recorded in [the batch report](quality-upgrade.md). Older build and device records below describe their original revisions.
+
+
+## Smooth illustration rendering
+
+Typography now uses Noto Sans Chinese and Latin glyphs rendered separately at each native size, with 4-bit coverage blended into RGB565. Shapes use clipped analytic strokes/ellipses with four coverage samples. Rounded UI panels, curved character silhouettes and vector medals replace deliberately enlarged pixel artwork; Road Rage no longer uses its bitmap motorcycle sprite. No supersampled framebuffer or new per-frame allocation is introduced. Physical resolution and real-device frame time still need acceptance testing. Browser Wasm memory is 512 KiB to accommodate immutable font data and its full preview frame; that does not change device strip memory. Current builds use `smooth-gate.log` and `smooth-receipt.json`; older upgrade receipts describe the prior graphics.

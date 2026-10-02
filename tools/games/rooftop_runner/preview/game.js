@@ -27,7 +27,7 @@ for(const button of buttons){
   button.addEventListener('lostpointercapture',e=>release(`p${e.pointerId}`,true));
   button.addEventListener('click',e=>{if(e.detail===0){press(key,'accessible');release('accessible');}});
 }
-const keys={KeyA:0,ArrowRight:0,KeyB:1,ArrowLeft:1,Enter:1,KeyC:2,Space:2,ArrowUp:2};
+const keys={KeyA:0,ArrowLeft:0,KeyB:1,ArrowRight:1,Enter:1,KeyC:2,Space:2,ArrowUp:2};
 window.addEventListener('keydown',e=>{
   if(!(e.code in keys)||e.target.closest('button')&&['Enter','Space'].includes(e.code))return;
   e.preventDefault();if(!e.repeat)press(keys[e.code],`k${e.code}`);

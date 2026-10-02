@@ -15,10 +15,9 @@
 - 添加字库前评估 Flash 与内部 RAM 影响；ESP32-C3 无 PSRAM。
 - 不提交许可不允许分发的字库。
 
-- `fonts/road_rage_noto_sc_subset.otf`：[Noto Sans CJK SC Regular](https://github.com/notofonts/noto-cjk/tree/main/Sans) 的 108 字子集，使用 [SIL OFL 1.1](fonts/OFL.txt) 许可。保留用于重现转换，不链接进固件。
-- `fonts/road_rage_noto_sc_12.h`：生成的 12px 单色中文字形，每格 12 × 14，Flash 字形记录约 3 KiB。共享游戏渲染器直接使用，无 LVGL 字体池或运行时解码。文案和字形覆盖检查：`python3 tools/games/road_rage/generate_font.py --check`；重生成：`python3 tools/games/road_rage/generate_font.py`（Pillow 12.2.0）。字符清单为 `main/games/road_rage/rr_copy.h`。新增用字需用 `--source <完整源字体.otf>` 重建 OTF 子集（fonttools 4.62.1），然后重新构建预览与固件。
+- `fonts/road_rage_noto_sc_subset.otf` 和 `fonts/road_rage_noto_sc_12.h`：208 个 Noto Sans CJK SC/ASCII 字形，三档实际字号分别栅格化，4bpp 抗锯齿（压缩字模 182,854 字节，另加字形指标），遵循 [SIL OFL](fonts/OFL.txt)。为兼容保留 `_12` 文件名，现包含三档字号。用 `python3 tools/games/road_rage/generate_font.py [--check]` 生成/检查；扩展字符使用 `--source <完整字体.otf>`。OTF 不链接到固件。
 
-- `fonts/cloudbound_noto_sc_subset.otf` 与 `fonts/cloudbound_noto_sc_12.h`：云间一跃的 88 字 Noto Sans CJK SC 子集和 12px 位图字形，Flash 字形记录 2,640 字节，遵守 [SIL OFL](fonts/OFL.txt)。文案清单为 `main/games/cloudbound/cb_copy.h`；生成／检查：`python3 tools/games/cloudbound/generate_font.py [--check]`。重建子集需要 `--source <完整源字体.otf>`、Pillow 12.2.0 与 fonttools 4.62.1。OTF 不链接到固件。
+- `fonts/cloudbound_noto_sc_subset.otf` 和 `fonts/cloudbound_noto_sc_12.h`：188 个 Noto Sans CJK SC/ASCII 字形，三档实际字号分别栅格化，4bpp 抗锯齿（压缩字模 159,334 字节，另加字形指标），遵循 [SIL OFL](fonts/OFL.txt)。为兼容保留 `_12` 文件名，现包含三档字号。用 `python3 tools/games/cloudbound/generate_font.py [--check]` 生成/检查；扩展字符使用 `--source <完整字体.otf>`。OTF 不链接到固件。
 
 ## 图片（images）
 
@@ -51,15 +50,15 @@
 
 - `fonts/starport_gunner_noto_sc_subset.otf` 与 `fonts/starport_gunner_noto_sc_12.h`：星港炮手的 76 字 Noto Sans CJK SC 子集和 12px 位图字形（2280 字节），遵守 [SIL OFL](fonts/OFL.txt)。文案为 `main/games/starport_gunner/sg_copy.h`，生成／检查为 `python3 tools/games/starport_gunner/generate_font.py [--check]`，OTF 不嵌入固件。
 
-- `fonts/alley_ninja_noto_sc_subset.otf` 与 `fonts/alley_ninja_noto_sc_12.h`：96 个 12px Noto Sans CJK SC 字形（2,880 字节），遵守 [SIL OFL](fonts/OFL.txt)。文案为 `main/games/alley_ninja/an_copy.h`，生成／检查为 `python3 tools/games/alley_ninja/generate_font.py [--check]`。OTF 不嵌入固件。
+- `fonts/alley_ninja_noto_sc_subset.otf` 和 `fonts/alley_ninja_noto_sc_12.h`：198 个 Noto Sans CJK SC/ASCII 字形，三档实际字号分别栅格化，4bpp 抗锯齿（压缩字模 171,094 字节，另加字形指标），遵循 [SIL OFL](fonts/OFL.txt)。为兼容保留 `_12` 文件名，现包含三档字号。用 `python3 tools/games/alley_ninja/generate_font.py [--check]` 生成/检查；扩展字符使用 `--source <完整字体.otf>`。OTF 不链接到固件。
 
 - `images/alley-ninja-cover.png`：1086 × 1448 RGB PNG，《夜巷忍者》的竖版 3:4 封面。2026-10-01 使用内置 imagegen 工具生成，已确认任务完成并查看实际上传文件。标有示意图，不是实机截图，不嵌入固件。生成提示：精美像素画，青色蒙面忍者格挡一名紫金护甲敌人，雨夜霓虹街巷，标题“夜巷忍者 / ALLEY NINJA”，带示意图标注。
 
-- `fonts/brick_workshop_noto_sc_subset.otf` 与 `fonts/brick_workshop_noto_sc_12.h`：弹砖工坊的 70 字 Noto Sans CJK SC 子集，12px 位图，共 2,100 字节 Flash 字形记录，许可 [SIL OFL](fonts/OFL.txt)。文案清单为 `main/games/brick_workshop/bw_copy.h`；生成和检查：`python3 tools/games/brick_workshop/generate_font.py [--check]`。OTF 不进入固件。
+- `fonts/brick_workshop_noto_sc_subset.otf` 和 `fonts/brick_workshop_noto_sc_12.h`：173 个 Noto Sans CJK SC/ASCII 字形，三档实际字号分别栅格化，4bpp 抗锯齿（压缩字模 141,694 字节，另加字形指标），遵循 [SIL OFL](fonts/OFL.txt)。为兼容保留 `_12` 文件名，现包含三档字号。用 `python3 tools/games/brick_workshop/generate_font.py [--check]` 生成/检查；扩展字符使用 `--source <完整字体.otf>`。OTF 不链接到固件。
 
 - `images/brick-workshop-cover.png`：弹砖工坊竖版 3:4 封面，1086 × 1448 RGB PNG。2026-10-01 使用内置 imagegen 工具生成，确认任务完成后复制并查看同一份上传文件。提示词：深蓝背景、粉/金/青/蓝玻璃砖、发光球、机械挡板与支架的精美像素工坊，中英文标题并明确标注示意图。属于宣传插画，并非实机截图。SHA256：`6eef5d2e821b85c2c6e7dec37b5c70485958712ca4c784b7c76e13e6fd561b98`。
 
-- `fonts/rooftop_runner_noto_sc_subset.otf` 与 `fonts/rooftop_runner_noto_sc_12.h`：跃影疾行使用的 85 字 Noto Sans CJK SC 子集，12px 位图，共 2,550 字节 Flash 字形记录，许可 [SIL OFL](fonts/OFL.txt)。文案：`main/games/rooftop_runner/rp_copy.h`；生成/检查：`python3 tools/games/rooftop_runner/generate_font.py [--check]`。扩展字符需 `--source <完整字体.otf>`，Pillow 12.2.0 与 fonttools 4.62.1。OTF 不进入固件。
+- `fonts/rooftop_runner_noto_sc_subset.otf` 和 `fonts/rooftop_runner_noto_sc_12.h`：184 个 Noto Sans CJK SC/ASCII 字形，三档实际字号分别栅格化，4bpp 抗锯齿（压缩字模 155,869 字节，另加字形指标），遵循 [SIL OFL](fonts/OFL.txt)。为兼容保留 `_12` 文件名，现包含三档字号。用 `python3 tools/games/rooftop_runner/generate_font.py [--check]` 生成/检查；扩展字符使用 `--source <完整字体.otf>`。OTF 不链接到固件。
 
 - `images/rooftop-runner-cover.png`：1086 × 1448 PNG，跃影疾行的竖版 3:4 封面。2026-10-01 使用内置 imagegen 工具生成，已确认任务完成，并查看实际复制的上传文件。标注中英文示意图字样，不是实机截图，不嵌入固件。提示词：精美像素风，青色衣服与金色围巾的跑者在日出城市屋顶间向右跳跃，发光奖励、检查点旗帜、少量屋顶障碍、中英文游戏标题和示意图标记。SHA256：`8f198098acad0b885f7e08d6acfa80ba00002b9f7f615ba99958312160b56d34`。
 
@@ -69,3 +68,5 @@
 ## 五款游戏代码绘图预览
 
 骑手、云间、忍者、弹砖和跑酷五份 `images/*-preview.png` 为 960 × 1280 竖版组合图。使用各游戏原生 C 绘图代码及代表性模型状态同步生成，再用 Pillow 排版；已标注代码绘图预览、非实机截图。实际上传文件已逐一查看，封面单独标注示意图。
+
+五款新版字体子集采用官方 [Noto CJK 仓库](https://github.com/notofonts/noto-cjk/tree/main/Sans/OTF/SimplifiedChinese) 的 Medium 字重，遵循 SIL OFL，不分发系统字体。

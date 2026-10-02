@@ -30,7 +30,7 @@ AI Passport 上的独立离线摩托竞速与打斗游戏：320 × 240 横屏、
 
 - `main/games/road_rage/`：可移植 C 游戏模型、整数 RGB565 渲染器、中文文案、合成音效、Wasm 桥接和 ESP-IDF 设备适配。
 - `tools/games/road_rage/preview/`：浏览器外壳，没有第二套玩法逻辑。
-- `assets/fonts/`：有许可的字体子集和生成的单色中文字形；英文装饰使用原创 5 × 7 位图字母。
+- `assets/fonts/`：有许可的 Noto Sans CJK SC Medium 字体子集与三档实际字号的 4bpp 中英文抗锯齿字形，已移除原 5 × 7 位图字母。
 - `tests/games/test_road_rage.c`：状态切换、16 组不攻击的完整五关通关模拟、释放／连按／长按边界、可见接触与攻击提示回归、缓冲边界、整帧与分块画面一致性、固定种子回放。
 
 使用支持 wasm32 的 clang 构建独立 Wasm 模块（已用 wasi-sdk 34.0 验证；脚本自动寻找 `build/toolchains/wasi-sdk-*/bin/clang`，也接受 `WASI_CLANG`）：
@@ -75,3 +75,8 @@ python3 -m http.server 8765 --bind 127.0.0.1 --directory build/games/road_rage/p
 4. 冲线后短 B 下一关，失败短 B 重试。关卡与每关最高勋章自动保存，可重玩挑战更好成绩。
 
 当前固件身份与验证边界见[批次报告](quality-upgrade.zh_CN.md)。本文之前的构建、实机记录仅适用于对应历史版本。
+
+
+## 平滑插画绘图
+
+字体改为 Noto Sans 中英文无衬线字体，各字号独立生成，以 4 位覆盖率混合至 RGB565。轮廓采用条带裁剪的解析线段/椭圆及四次覆盖采样；圆角界面、曲线人物和矢量勋章替代刻意放大的像素绘图，骑手不再使用位图摩托精灵。没有新增超采样帧缓冲或逐帧堆分配。物理分辨率及实机帧耗时仍需验收。浏览器 Wasm 内存为 512 KiB，用于只读字模及完整预览帧，不改变设备条带内存。当前构建见 `smooth-gate.log` 与 `smooth-receipt.json`；旧优化归档对应之前的画面。

@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parents[3]
 SOURCES = [ROOT / 'main/games/brick_workshop' / f for f in ('bw_game.c', 'bw_game.h', 'bw_render.c', 'bw_wasm.c', 'bw_copy.h')]
 SOURCES += [ROOT / 'main/games/common/game_audio.c', ROOT / 'main/games/common/game_audio.h']
 SOURCES += [ROOT / 'assets/fonts/brick_workshop_noto_sc_12.h', ROOT / 'assets/fonts/brick_workshop_noto_sc_subset.otf']
-SOURCES += [ROOT / 'main/games/common/game_visual.h', ROOT / 'main/games/common/game_achievements.h']
+SOURCES += [ROOT / 'main/games/common/game_visual.h', ROOT / 'main/games/common/game_shapes.h', ROOT / 'main/games/common/game_achievements.h']
 OUT = ROOT / 'build/games/brick_workshop/preview'
 SHELL = ROOT / 'tools/games/brick_workshop/preview'
 
@@ -41,8 +41,8 @@ if __name__ == '__main__':
         OUT.mkdir(parents=True, exist_ok=True)
         exports = ('game_init', 'game_edge', 'game_tick', 'game_cancel', 'game_frame', 'game_hash', 'game_phase', 'game_effect', 'game_sound_sample', 'game_music_theme', 'game_music')
         cmd = [compiler, '--target=wasm32', '-O2', '-std=c11', '-Wall', '-Wextra', '-Werror', '-nostdlib',
-               '-fno-builtin', '-I' + str(ROOT / 'assets/fonts'), '-I' + str(ROOT / 'main/games/common'), '-Wl,--no-entry', '-Wl,--export-memory', '-Wl,--initial-memory=262144',
-               '-Wl,--max-memory=262144', '-Wl,-z,stack-size=16384']
+               '-fno-builtin', '-I' + str(ROOT / 'assets/fonts'), '-I' + str(ROOT / 'main/games/common'), '-Wl,--no-entry', '-Wl,--export-memory', '-Wl,--initial-memory=524288',
+               '-Wl,--max-memory=524288', '-Wl,-z,stack-size=16384']
         cmd += [f'-Wl,--export={name}' for name in exports]
         cmd += [str(p) for p in SOURCES if p.suffix == '.c'] + ['-o', str(OUT / 'game.wasm')]
         subprocess.run(cmd, check=True)

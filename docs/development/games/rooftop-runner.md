@@ -2,12 +2,12 @@
 
 # Rooftop Runner
 
-An offline landscape platform runner with the creator's requested physical controls: A moves forward, B moves backward and C jumps. Traverse rooftops, collect glowing tokens and reach the finish. Five courses add height changes, spikes and moving saws, with rooftop checkpoints for quick recovery.
+An offline landscape platform runner with physical controls: A moves left, B moves right and C jumps. Traverse rooftops, collect glowing tokens and reach the finish. Five courses add height changes, spikes and moving saws, with rooftop checkpoints for quick recovery.
 
 ## Start playing
 
 1. Hold the device horizontally; no network setup is needed. Tap B on the title screen to start. A/C select unlocked courses.
-2. Hold A to run forward or B to run backward. Release to stop immediately on the ground. Move toward a roof's edge, release the movement key and promptly tap C to jump in that direction. After standing still, C jumps vertically.
+2. Hold A to move left or B to move right. Release to stop immediately on the ground. Move toward a roof's edge, release the movement key and promptly tap C to jump in that direction. After standing still, C jumps vertically.
 3. Airborne movement continues until landing, and A/B can adjust its direction. Landing stops horizontal movement when no direction key is held. Simultaneous button presses are never required.
 4. Hold C for about 0.8 seconds to pause; tap B to resume. Hold A while paused to return to the title. Missing a roof or touching a hazard automatically returns you to the latest checkpoint, preserving collected tokens and the current score.
 5. Tap B after finishing to advance; the fifth course offers a replay. Hold B on results to return to the title. Hold A on the title to toggle sound. Unlocked courses, best course score and sound setting are saved.
@@ -43,7 +43,7 @@ python3 tools/games/rooftop_runner/build_preview.py
 python3 -m http.server 8770 --bind 127.0.0.1 --directory build/games/rooftop_runner/preview
 ```
 
-Activate ESP-IDF 5.5.3 for firmware builds. Browser controls: A/right arrow forward, B/left arrow backward, C/up arrow/space jump, and B/enter for menu confirmation. Pointer buttons mirror the device. Blur or canceled pointers pause; browser sound starts off and progress is session-only. Rendered PNGs under `build/games/rooftop_runner/` come from actual drawing code, not a physical device.
+Activate ESP-IDF 5.5.3 for firmware builds. Browser controls: A/left arrow left, B/right arrow right, C/up arrow/space jump, and B/enter for menu confirmation. Pointer buttons mirror the device. Blur or canceled pointers pause; browser sound starts off and progress is session-only. Rendered PNGs under `build/games/rooftop_runner/` come from actual drawing code, not a physical device.
 
 Host tests complete 100 stages across five courses, varying launch position and the sequential C hold from 20–100ms, without falls. Five additional backward routes verify every course and bounded camera movement. Regression checks cover immediate stop, direction reversal, standing/running jumps, no double jump, high-speed landing, side collision, no upward snapping, checkpoint recovery, retained rewards, pause, stale timestamps, clock wrap, unlocks and replay. Five strip heights are compared to full rendering across 25 scenes with memory guards. Native/Wasm replay compares 21 model and RGB565 checkpoints across 2,000 steps. Hardware behavior is validated separately.
 
@@ -83,9 +83,27 @@ ELF SHA256:  a282b0d39e32d29755a1f98e1c968662aa9a6a69cdf1f9744f5d181c28bc7808
 Added flawless and full-collection medals, persistent best stage medals and a 300-point full-collection bonus. Added city music and distinct collection/checkpoint cues, retaining the existing edge-jump grace and pre-landing jump buffer.
 
 1. Hold the device horizontally; no network setup is needed. Tap B on the title to start; A/C select an unlocked course.
-2. Hold A to move forward or B backward; release to stop. Near an edge, release the direction button and immediately tap C to jump that way. Tap C while standing still for a vertical jump.
+2. Hold A to move left or B right; release to stop. Near an edge, release the direction button and immediately tap C to jump that way. Tap C while standing still for a vertical jump.
 3. Adjust direction in the air with A/B, avoid hazards and collect glowing rewards. Falls or collisions return you to the latest checkpoint while keeping rewards collected this attempt. A full collection earns extra points.
 4. Hold C to pause, tap B to resume, and hold A while paused to return to the title. Hold A on the title to toggle sound.
 5. At the finish, tap B for the next course; the fifth can be replayed. Unlocks, best score and stage medals save automatically. Aim for a flawless run or full collection.
 
 Current artifact identities and validation limits are recorded in [the batch report](quality-upgrade.md). Older build and device records below describe their original revisions.
+
+
+## Smooth illustration rendering
+
+Typography now uses Noto Sans Chinese and Latin glyphs rendered separately at each native size, with 4-bit coverage blended into RGB565. Shapes use clipped analytic strokes/ellipses with four coverage samples. Rounded UI panels, curved character silhouettes and vector medals replace deliberately enlarged pixel artwork; Road Rage no longer uses its bitmap motorcycle sprite. No supersampled framebuffer or new per-frame allocation is introduced. Physical resolution and real-device frame time still need acceptance testing. Browser Wasm memory is 512 KiB to accommodate immutable font data and its full preview frame; that does not change device strip memory. Current builds use `smooth-gate.log` and `smooth-receipt.json`; older upgrade receipts describe the prior graphics.
+
+## Direction-key fix (2026-10-02)
+
+Gameplay now uses A to move left, B to move right, and C to jump, matching the button order. The remembered jump direction, airborne steering, screen instructions and browser arrow keys follow the same mapping. B still confirms menu actions. Host regressions check movement, stopping, sequential jumps and airborne reversal for both buttons, alongside all five forward and backward routes. Physical button placement and feel still require device acceptance.
+
+Build: PASS; Host tests: PASS; Device tests: NOT RUN. No game device was identified; physical direction and feel require acceptance.
+
+Fixed firmware archive: `build/firmware/64703413babdb5689c78d1e87743fc70ff2bb3de79a9373fd0f4c7b9d595a448`; merged image 610,960 bytes, `0x0`.
+
+```text
+full SHA256: 64703413babdb5689c78d1e87743fc70ff2bb3de79a9373fd0f4c7b9d595a448
+ELF SHA256:  e02134739e425733cb8c064e66ce4ad8c3e50d2a7f27077467cb787f804e7aa8
+```

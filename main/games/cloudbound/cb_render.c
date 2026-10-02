@@ -1,5 +1,6 @@
 #include "cb_game.h"
 #include "../common/game_visual.h"
+#include "../common/game_shapes.h"
 #include "cb_copy.h"
 #include "cloudbound_noto_sc_12.h"
 #include <stddef.h>
@@ -24,92 +25,55 @@ static void box(canvas_t *c, int x, int y, int w, int h, uint16_t color)
         for (int xx = left; xx < right; ++xx) c->pixels[(yy - c->y) * CB_WIDTH + xx] = color;
 }
 
-/* Integer Bresenham line, including both endpoints; clipped by box(). */
-static void line(canvas_t *c, int x, int y, int tx, int ty, int width, uint16_t color)
+static void panel(canvas_t *c,int x,int y,int w,int h,uint16_t color)
 {
-    if (max(y,ty)+width <= c->y || min(y,ty) >= c->y+c->rows) return;
-    int dx = tx > x ? tx - x : x - tx, sx = x < tx ? 1 : -1;
-    int dy = ty > y ? y - ty : ty - y, sy = y < ty ? 1 : -1, err = dx + dy;
-    for (;;) {
-        box(c, x, y, width, width, color);
-        if (x == tx && y == ty) break;
-        int e = 2 * err;
-        if (e >= dy) { err += dy; x += sx; }
-        if (e <= dx) { err += dx; y += sy; }
-    }
+    game_shape_panel(c->pixels,c->y,c->rows,x,y,w,h,6,color);
 }
 
-/* Filled ellipse using squared integer distances; no floating-point library. */
-static void oval(canvas_t *c, int cx, int cy, int rx, int ry, uint16_t color)
+/* Smooth vector strokes and ellipses, clipped to the strip. */
+static void line(canvas_t *c,int x,int y,int tx,int ty,int width,uint16_t color)
 {
-    for (int y = max(cy - ry, c->y); y <= min(cy + ry, c->y + c->rows - 1); ++y)
-        for (int x = max(cx - rx, 0); x <= min(cx + rx, CB_WIDTH - 1); ++x)
-            if ((x-cx)*(x-cx)*ry*ry + (y-cy)*(y-cy)*rx*rx <= rx*rx*ry*ry)
-                c->pixels[(y-c->y)*CB_WIDTH+x] = color;
+    game_shape_stroke(c->pixels,c->y,c->rows,x,y,tx,ty,width,color);
+}
+static void oval(canvas_t *c,int cx,int cy,int rx,int ry,uint16_t color)
+{
+    game_shape_ellipse(c->pixels,c->y,c->rows,cx,cy,rx,ry,color);
 }
 
-/* Original compact 5x7 uppercase bitmap alphabet, resident in read-only Flash. */
-static const uint8_t font[][7] = {
- {14,17,17,31,17,17,17},{30,17,17,30,17,17,30},{14,17,16,16,16,17,14},
- {30,17,17,17,17,17,30},{31,16,16,30,16,16,31},{31,16,16,30,16,16,16},
- {14,17,16,23,17,17,14},{17,17,17,31,17,17,17},{14,4,4,4,4,4,14},
- {7,2,2,2,18,18,12},{17,18,20,24,20,18,17},{16,16,16,16,16,16,31},
- {17,27,21,21,17,17,17},{17,25,21,19,17,17,17},{14,17,17,17,17,17,14},
- {30,17,17,30,16,16,16},{14,17,17,17,21,18,13},{30,17,17,30,20,18,17},
- {15,16,16,14,1,1,30},{31,4,4,4,4,4,4},{17,17,17,17,17,17,14},
- {17,17,17,17,17,10,4},{17,17,17,21,21,21,10},{17,17,10,4,10,17,17},
- {17,17,10,4,4,4,4},{31,1,2,4,8,16,31},
- {14,17,19,21,25,17,14},{4,12,4,4,4,4,14},{14,17,1,2,4,8,31},
- {30,1,1,14,1,1,30},{2,6,10,18,31,2,2},{31,16,16,30,1,1,30},
- {14,16,16,30,17,17,14},{31,1,2,4,8,8,8},{14,17,17,14,17,17,14},
- {14,17,17,15,1,1,14}
-};
-
-/* Text uses a fixed Flash alphabet, not runtime fonts or transient allocations. */
-static void text(canvas_t *c, int x, int y, const char *s, int scale, uint16_t color)
+/* Native-size 4bpp Noto Sans glyphs: no nearest-neighbor font scaling. */
+static void ztext(canvas_t *c,int x,int y,const char *s,int scale,uint16_t color)
 {
-    if (y+7*scale <= c->y || y >= c->y+c->rows) return;
-    for (; *s; ++s, x += 6 * scale) {
-        int glyph = *s >= 'A' && *s <= 'Z' ? *s - 'A' : *s >= '0' && *s <= '9' ? *s - '0' + 26 : -1;
-        if (glyph >= 0) {
-            for (int yy = 0; yy < 7; ++yy)
-                for (int xx = 0; xx < 5; ++xx)
-                    if (font[glyph][yy] & (16 >> xx)) box(c, x+xx*scale, y+yy*scale, scale, scale, color);
-        } else if (*s == '.') box(c, x+2*scale, y+6*scale, scale, scale, color);
-        else if (*s == '+') { box(c,x,y+3*scale,5*scale,scale,color); box(c,x+2*scale,y+scale,scale,5*scale,color); }
-        else if (*s == '-') box(c, x, y+3*scale, 5*scale, scale, color);
-        else if (*s == '/') line(c, x+4*scale, y, x, y+6*scale, scale, color);
-        else if (*s == ':') { box(c,x+2*scale,y+2*scale,scale,scale,color); box(c,x+2*scale,y+5*scale,scale,scale,color); }
-    }
-}
-
-/* Decode only the validated UTF-8 copy. Missing glyphs remain visible as boxes. */
-static void ztext(canvas_t *c, int x, int y, const char *s, int scale, uint16_t color)
-{
-    if (y+14*scale <= c->y || y >= c->y+c->rows) return;
-    while (*s) {
-        const unsigned char *p = (const unsigned char *)s;
-        if (*p < 128) {
-            char ascii[] = { *s++,0 };
-            text(c,x,y+2*scale,ascii,scale,color); x += 6*scale;
-            continue;
+    if(scale<1||scale>3||y+42<=c->y||y>=c->y+c->rows)return;
+    while(*s){
+        const unsigned char *p=(const unsigned char *)s;uint16_t cp;
+        if(*p<128){cp=*p;s++;}
+        else if((p[0]&0xf0)==0xe0&&p[1]&&p[2]){cp=(uint16_t)(((p[0]&15)<<12)|((p[1]&63)<<6)|(p[2]&63));s+=3;}
+        else{s++;continue;}
+        const cb_cjk_glyph_t *glyph=NULL;
+        unsigned lo=0,hi=CB_CJK_GLYPH_COUNT;
+        while(lo<hi){unsigned mid=lo+(hi-lo)/2;const cb_cjk_glyph_t *candidate=&cb_cjk_glyphs[mid];
+            if(candidate->scale<scale||(candidate->scale==scale&&candidate->codepoint<cp))lo=mid+1;else hi=mid;
         }
-        uint16_t codepoint = 0;
-        if ((p[0]&0xf0)==0xe0 && p[1] && p[2]) {
-            codepoint = (uint16_t)(((p[0]&15)<<12)|((p[1]&63)<<6)|(p[2]&63)); s += 3;
-        } else { ++s; }
-        const cb_cjk_glyph_t *glyph = NULL;
-        for (unsigned i=0;i<CB_CJK_GLYPH_COUNT;++i)
-            if(cb_cjk_glyphs[i].codepoint==codepoint){glyph=&cb_cjk_glyphs[i];break;}
-        if(glyph) {
-            for(int yy=0;yy<14;++yy)for(int xx=0;xx<12;++xx)
-                if(glyph->rows[yy]&(1<<(11-xx)))box(c,x+xx*scale,y+yy*scale,scale,scale,color);
-        } else {
-            box(c,x,y,10*scale,scale,RED); box(c,x,y+11*scale,10*scale,scale,RED);
-            box(c,x,y,scale,12*scale,RED); box(c,x+9*scale,y,scale,12*scale,RED);
+        if(lo<CB_CJK_GLYPH_COUNT&&cb_cjk_glyphs[lo].scale==scale&&cb_cjk_glyphs[lo].codepoint==cp)glyph=&cb_cjk_glyphs[lo];
+        if(!glyph){box(c,x,y,10*scale,scale,RED);x+=12*scale;continue;}
+        for(int yy=max(y,c->y);yy<min(y+glyph->height,c->y+c->rows);yy++){
+            for(int xx=max(x,0);xx<min(x+glyph->width,CB_WIDTH);xx++){
+                unsigned index=(unsigned)((yy-y)*glyph->width+xx-x);
+                unsigned packed=cb_font_alpha[glyph->offset+index/2];
+                int alpha=(index&1)?(packed&15):(packed>>4);if(!alpha)continue;
+                uint16_t *pixel=&c->pixels[(yy-c->y)*CB_WIDTH+xx];uint16_t bg=*pixel;
+                int r=(((color>>11)&31)*alpha+((bg>>11)&31)*(15-alpha)+7)/15;
+                int g=(((color>>5)&63)*alpha+((bg>>5)&63)*(15-alpha)+7)/15;
+                int b=((color&31)*alpha+(bg&31)*(15-alpha)+7)/15;
+                *pixel=(uint16_t)((r<<11)|(g<<5)|b);
+            }
         }
-        x += 12*scale;
+        x+=glyph->advance;
     }
+}
+static void text(canvas_t *c,int x,int y,const char *s,int scale,uint16_t color)
+{
+    ztext(c,x,y,s,scale,color);
 }
 
 /* Decimal formatting without libc, bounded to six digits. */
@@ -122,7 +86,13 @@ static void number(canvas_t *c, int x, int y, int value, int scale, uint16_t col
 }
 
 static int text_width(const char *s,int scale){
-    int n=0;while(*s){if((unsigned char)*s<128){s++;n+=6*scale;}else{s+=3;n+=12*scale;}}return n;
+    int width=0;
+    while(*s){const unsigned char *p=(const unsigned char *)s;uint16_t cp;
+        if(*p<128){cp=*p;s++;}
+        else if((p[0]&0xf0)==0xe0&&p[1]&&p[2]){cp=(uint16_t)(((p[0]&15)<<12)|((p[1]&63)<<6)|(p[2]&63));s+=3;}
+        else{s++;continue;}
+        for(unsigned i=0;i<CB_CJK_GLYPH_COUNT;i++)if(cb_cjk_glyphs[i].codepoint==cp&&cb_cjk_glyphs[i].scale==scale){width+=cb_cjk_glyphs[i].advance;break;}
+    }return width;
 }
 static void center(canvas_t *c,int y,const char *s,int scale,uint16_t color){ztext(c,(CB_WIDTH-text_width(s,scale))/2,y,s,scale,color);}
 static void cloud(canvas_t *c,int x,int y,int w,uint16_t shade){
@@ -174,10 +144,10 @@ static void island(canvas_t *c,cb_platform_t p,int camera,int stage){
 static void traveler(canvas_t *c,int x,int feet,int crouch,int flying){
     int y=feet-25+crouch;
     oval(c,x,feet+3,10,2,RGB(54,81,113));
-    box(c,x-6,y+10,12,11-crouch,RGB(32,55,83));
-    box(c,x-5,y+11,10,7,TEAL);box(c,x-5,y+17,3,5,GOLD);
-    box(c,x-5,y+2,10,9,RGB(255,220,181));
-    box(c,x-7,y,14,5,RGB(37,58,83));box(c,x-8,y+4,16,2,RGB(37,58,83));
+    oval(c,x,y+15,6,7-crouch/2,RGB(32,55,83));
+    oval(c,x,y+14,5,5,TEAL);box(c,x-5,y+17,3,5,GOLD);
+    oval(c,x,y+6,5,5,RGB(255,220,181));
+    oval(c,x,y+2,7,4,RGB(37,58,83));box(c,x-8,y+4,16,2,RGB(37,58,83));
     box(c,x+3,y+6,2,2,INK);
     box(c,x-6,feet-4,5,4,INK);box(c,x+2,feet-4,5,4,INK);
     line(c,x-5,y+12,x-12,y+(flying?10:18),2,TEAL);
@@ -211,13 +181,13 @@ static void battery(canvas_t *c,const cb_game_t *g){
     else line(c,268,17,275,17,1,CREAM);
 }
 static void hud(canvas_t *c,const cb_game_t *g){
-    box(c,32,8,217,27,INK);ztext(c,39,14,CB_STAGE,1,CREAM);number(c,69,16,g->stage,1,GOLD);
+    panel(c,32,8,217,27,INK);ztext(c,39,14,CB_STAGE,1,CREAM);number(c,69,16,g->stage,1,GOLD);
     ztext(c,89,14,CB_PROGRESS,1,CREAM);number(c,121,16,g->landings,1,TEAL);text(c,135,16,"/12",1,CREAM);
     ztext(c,165,14,CB_SCORE,1,CREAM);number(c,194,16,g->score,1,GOLD);
     if(g->phase!=CB_PLAY)return;
-    box(c,32,196,256,37,INK);
+    panel(c,32,196,256,37,INK);
     if(g->charging){
-        box(c,45,202,230,6,RGB(46,66,87));box(c,45,202,230*g->charge_ms/CB_CHARGE_MAX,6,g->charge_ms>=CB_CHARGE_MAX?GOLD:TEAL);
+        panel(c,45,202,230,6,RGB(46,66,87));panel(c,45,202,230*g->charge_ms/CB_CHARGE_MAX,6,g->charge_ms>=CB_CHARGE_MAX?GOLD:TEAL);
         center(c,214,g->charge_ms>=CB_CHARGE_MAX?CB_CAPPED:CB_CONTROL,1,CREAM);
     }else center(c,200,g->flying?CB_FLYING:g->scroll_ms?CB_SCROLL:CB_READY,1,CREAM);
     if(!g->charging)center(c,217,CB_PAUSE_HINT,1,RGB(160,186,199));
@@ -226,11 +196,11 @@ static void overlay(canvas_t *c,const cb_game_t *g){
     if(g->phase==CB_TITLE){
         center(c,37,CB_TITLE_TEXT,2,CREAM);center(c,69,CB_SUBTITLE,1,GOLD);
         center(c,91,cb_stage_names[g->stage-1],1,CREAM);
-        box(c,38,177,244,58,INK);center(c,181,CB_START,1,TEAL);center(c,198,CB_CONTROL,1,CREAM);
+        panel(c,38,177,244,58,INK);center(c,181,CB_START,1,TEAL);center(c,198,CB_CONTROL,1,CREAM);
         center(c,216,CB_SELECT,1,RGB(177,199,212));
         ztext(c,35,13,g->muted?CB_MUTED:CB_SOUND,1,CREAM);
     }else if(g->phase==CB_PAUSED||g->phase==CB_CLEAR||g->phase==CB_FAILED){
-        box(c,39,58,242,133,TEAL);box(c,41,60,238,129,INK);
+        panel(c,39,58,242,133,TEAL);panel(c,41,60,238,129,INK);
         const char *title=g->phase==CB_PAUSED?CB_PAUSED_TEXT:g->phase==CB_FAILED?CB_FAILED_TEXT:g->stage==5?CB_CLEAR_TEXT:CB_WON;
         center(c,72,title,2,CREAM);
         ztext(c,91,105,CB_SCORE,1,CREAM);number(c,147,107,g->score,2,GOLD);

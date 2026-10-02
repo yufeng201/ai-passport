@@ -1,5 +1,6 @@
 #include "an_game.h"
 #include "../common/game_visual.h"
+#include "../common/game_shapes.h"
 #include "an_copy.h"
 #include "alley_ninja_noto_sc_12.h"
 #include <stddef.h>
@@ -24,92 +25,55 @@ static void box(canvas_t *c, int x, int y, int w, int h, uint16_t color)
         for (int xx = left; xx < right; ++xx) c->pixels[(yy - c->y) * AN_WIDTH + xx] = color;
 }
 
-/* Integer Bresenham line, including both endpoints; clipped by box(). */
-static void line(canvas_t *c, int x, int y, int tx, int ty, int width, uint16_t color)
+static void panel(canvas_t *c,int x,int y,int w,int h,uint16_t color)
 {
-    if (max(y,ty)+width <= c->y || min(y,ty) >= c->y+c->rows) return;
-    int dx = tx > x ? tx - x : x - tx, sx = x < tx ? 1 : -1;
-    int dy = ty > y ? y - ty : ty - y, sy = y < ty ? 1 : -1, err = dx + dy;
-    for (;;) {
-        box(c, x, y, width, width, color);
-        if (x == tx && y == ty) break;
-        int e = 2 * err;
-        if (e >= dy) { err += dy; x += sx; }
-        if (e <= dx) { err += dx; y += sy; }
-    }
+    game_shape_panel(c->pixels,c->y,c->rows,x,y,w,h,6,color);
 }
 
-/* Filled ellipse using squared integer distances; no floating-point library. */
-static void oval(canvas_t *c, int cx, int cy, int rx, int ry, uint16_t color)
+/* Smooth vector strokes and ellipses, clipped to the strip. */
+static void line(canvas_t *c,int x,int y,int tx,int ty,int width,uint16_t color)
 {
-    for (int y = max(cy - ry, c->y); y <= min(cy + ry, c->y + c->rows - 1); ++y)
-        for (int x = max(cx - rx, 0); x <= min(cx + rx, AN_WIDTH - 1); ++x)
-            if ((x-cx)*(x-cx)*ry*ry + (y-cy)*(y-cy)*rx*rx <= rx*rx*ry*ry)
-                c->pixels[(y-c->y)*AN_WIDTH+x] = color;
+    game_shape_stroke(c->pixels,c->y,c->rows,x,y,tx,ty,width,color);
+}
+static void oval(canvas_t *c,int cx,int cy,int rx,int ry,uint16_t color)
+{
+    game_shape_ellipse(c->pixels,c->y,c->rows,cx,cy,rx,ry,color);
 }
 
-/* Original compact 5x7 uppercase bitmap alphabet, resident in read-only Flash. */
-static const uint8_t font[][7] = {
- {14,17,17,31,17,17,17},{30,17,17,30,17,17,30},{14,17,16,16,16,17,14},
- {30,17,17,17,17,17,30},{31,16,16,30,16,16,31},{31,16,16,30,16,16,16},
- {14,17,16,23,17,17,14},{17,17,17,31,17,17,17},{14,4,4,4,4,4,14},
- {7,2,2,2,18,18,12},{17,18,20,24,20,18,17},{16,16,16,16,16,16,31},
- {17,27,21,21,17,17,17},{17,25,21,19,17,17,17},{14,17,17,17,17,17,14},
- {30,17,17,30,16,16,16},{14,17,17,17,21,18,13},{30,17,17,30,20,18,17},
- {15,16,16,14,1,1,30},{31,4,4,4,4,4,4},{17,17,17,17,17,17,14},
- {17,17,17,17,17,10,4},{17,17,17,21,21,21,10},{17,17,10,4,10,17,17},
- {17,17,10,4,4,4,4},{31,1,2,4,8,16,31},
- {14,17,19,21,25,17,14},{4,12,4,4,4,4,14},{14,17,1,2,4,8,31},
- {30,1,1,14,1,1,30},{2,6,10,18,31,2,2},{31,16,16,30,1,1,30},
- {14,16,16,30,17,17,14},{31,1,2,4,8,8,8},{14,17,17,14,17,17,14},
- {14,17,17,15,1,1,14}
-};
-
-/* Text uses a fixed Flash alphabet, not runtime fonts or transient allocations. */
-static void text(canvas_t *c, int x, int y, const char *s, int scale, uint16_t color)
+/* Native-size 4bpp Noto Sans glyphs: no nearest-neighbor font scaling. */
+static void ztext(canvas_t *c,int x,int y,const char *s,int scale,uint16_t color)
 {
-    if (y+7*scale <= c->y || y >= c->y+c->rows) return;
-    for (; *s; ++s, x += 6 * scale) {
-        int glyph = *s >= 'A' && *s <= 'Z' ? *s - 'A' : *s >= '0' && *s <= '9' ? *s - '0' + 26 : -1;
-        if (glyph >= 0) {
-            for (int yy = 0; yy < 7; ++yy)
-                for (int xx = 0; xx < 5; ++xx)
-                    if (font[glyph][yy] & (16 >> xx)) box(c, x+xx*scale, y+yy*scale, scale, scale, color);
-        } else if (*s == '.') box(c, x+2*scale, y+6*scale, scale, scale, color);
-        else if (*s == '+') { box(c,x,y+3*scale,5*scale,scale,color); box(c,x+2*scale,y+scale,scale,5*scale,color); }
-        else if (*s == '-') box(c, x, y+3*scale, 5*scale, scale, color);
-        else if (*s == '/') line(c, x+4*scale, y, x, y+6*scale, scale, color);
-        else if (*s == ':') { box(c,x+2*scale,y+2*scale,scale,scale,color); box(c,x+2*scale,y+5*scale,scale,scale,color); }
-    }
-}
-
-/* Decode only the validated UTF-8 copy. Missing glyphs remain visible as boxes. */
-static void ztext(canvas_t *c, int x, int y, const char *s, int scale, uint16_t color)
-{
-    if (y+14*scale <= c->y || y >= c->y+c->rows) return;
-    while (*s) {
-        const unsigned char *p = (const unsigned char *)s;
-        if (*p < 128) {
-            char ascii[] = { *s++,0 };
-            text(c,x,y+2*scale,ascii,scale,color); x += 6*scale;
-            continue;
+    if(scale<1||scale>3||y+42<=c->y||y>=c->y+c->rows)return;
+    while(*s){
+        const unsigned char *p=(const unsigned char *)s;uint16_t cp;
+        if(*p<128){cp=*p;s++;}
+        else if((p[0]&0xf0)==0xe0&&p[1]&&p[2]){cp=(uint16_t)(((p[0]&15)<<12)|((p[1]&63)<<6)|(p[2]&63));s+=3;}
+        else{s++;continue;}
+        const an_cjk_glyph_t *glyph=NULL;
+        unsigned lo=0,hi=AN_CJK_GLYPH_COUNT;
+        while(lo<hi){unsigned mid=lo+(hi-lo)/2;const an_cjk_glyph_t *candidate=&an_cjk_glyphs[mid];
+            if(candidate->scale<scale||(candidate->scale==scale&&candidate->codepoint<cp))lo=mid+1;else hi=mid;
         }
-        uint16_t codepoint = 0;
-        if ((p[0]&0xf0)==0xe0 && p[1] && p[2]) {
-            codepoint = (uint16_t)(((p[0]&15)<<12)|((p[1]&63)<<6)|(p[2]&63)); s += 3;
-        } else { ++s; }
-        const an_cjk_glyph_t *glyph = NULL;
-        for (unsigned i=0;i<AN_CJK_GLYPH_COUNT;++i)
-            if(an_cjk_glyphs[i].codepoint==codepoint){glyph=&an_cjk_glyphs[i];break;}
-        if(glyph) {
-            for(int yy=0;yy<14;++yy)for(int xx=0;xx<12;++xx)
-                if(glyph->rows[yy]&(1<<(11-xx)))box(c,x+xx*scale,y+yy*scale,scale,scale,color);
-        } else {
-            box(c,x,y,10*scale,scale,RED); box(c,x,y+11*scale,10*scale,scale,RED);
-            box(c,x,y,scale,12*scale,RED); box(c,x+9*scale,y,scale,12*scale,RED);
+        if(lo<AN_CJK_GLYPH_COUNT&&an_cjk_glyphs[lo].scale==scale&&an_cjk_glyphs[lo].codepoint==cp)glyph=&an_cjk_glyphs[lo];
+        if(!glyph){box(c,x,y,10*scale,scale,RED);x+=12*scale;continue;}
+        for(int yy=max(y,c->y);yy<min(y+glyph->height,c->y+c->rows);yy++){
+            for(int xx=max(x,0);xx<min(x+glyph->width,AN_WIDTH);xx++){
+                unsigned index=(unsigned)((yy-y)*glyph->width+xx-x);
+                unsigned packed=an_font_alpha[glyph->offset+index/2];
+                int alpha=(index&1)?(packed&15):(packed>>4);if(!alpha)continue;
+                uint16_t *pixel=&c->pixels[(yy-c->y)*AN_WIDTH+xx];uint16_t bg=*pixel;
+                int r=(((color>>11)&31)*alpha+((bg>>11)&31)*(15-alpha)+7)/15;
+                int g=(((color>>5)&63)*alpha+((bg>>5)&63)*(15-alpha)+7)/15;
+                int b=((color&31)*alpha+(bg&31)*(15-alpha)+7)/15;
+                *pixel=(uint16_t)((r<<11)|(g<<5)|b);
+            }
         }
-        x += 12*scale;
+        x+=glyph->advance;
     }
+}
+static void text(canvas_t *c,int x,int y,const char *s,int scale,uint16_t color)
+{
+    ztext(c,x,y,s,scale,color);
 }
 
 /* Decimal formatting without libc, bounded to six digits. */
@@ -122,7 +86,13 @@ static void number(canvas_t *c, int x, int y, int value, int scale, uint16_t col
 }
 
 static int text_width(const char *s,int scale){
-    int n=0;while(*s){if((unsigned char)*s<128){s++;n+=6*scale;}else{s+=3;n+=12*scale;}}return n;
+    int width=0;
+    while(*s){const unsigned char *p=(const unsigned char *)s;uint16_t cp;
+        if(*p<128){cp=*p;s++;}
+        else if((p[0]&0xf0)==0xe0&&p[1]&&p[2]){cp=(uint16_t)(((p[0]&15)<<12)|((p[1]&63)<<6)|(p[2]&63));s+=3;}
+        else{s++;continue;}
+        for(unsigned i=0;i<AN_CJK_GLYPH_COUNT;i++)if(an_cjk_glyphs[i].codepoint==cp&&an_cjk_glyphs[i].scale==scale){width+=an_cjk_glyphs[i].advance;break;}
+    }return width;
 }
 static void center(canvas_t *c,int y,const char *s,int scale,uint16_t color){ztext(c,(AN_WIDTH-text_width(s,scale))/2,y,s,scale,color);}
 static void background(canvas_t *c,const an_game_t *g){
@@ -152,10 +122,10 @@ static void background(canvas_t *c,const an_game_t *g){
 static void fighter(canvas_t *c,int x,int side,int enemy,int kind,int crouch){
     int y=160+crouch;
     oval(c,x,194,12,3,RGB(13,21,36));
-    box(c,x-6,y+13,12,14-crouch,enemy?RGB(94,52,98):RGB(35,76,103));
-    box(c,x-7,y+1,14,12,enemy?RGB(102,67,111):RGB(53,91,123));
+    oval(c,x,y+20,7,9-crouch/2,enemy?RGB(94,52,98):RGB(35,76,103));
+    oval(c,x,y+7,7,7,enemy?RGB(102,67,111):RGB(53,91,123));
     box(c,x-7,y+2,14,4,enemy?RED:TEAL);box(c,x+side*3,y+7,3,2,CREAM);
-    box(c,x-5,186,4,8,INK);box(c,x+2,186,4,8,INK);
+    line(c,x-3,184,x-5,192,4,INK);line(c,x+3,184,x+5,192,4,INK);
     line(c,x+side*5,y+15,x+side*13,y+18,3,enemy?RGB(117,63,111):TEAL);
     line(c,x+side*13,y+18,x+side*20,y+6,1,CREAM);
     line(c,x-side*6,y+5,x-side*17,y+8,2,enemy?RED:TEAL);
@@ -187,25 +157,25 @@ static void world(canvas_t *c,const an_game_t *g){
     if(g->damage_ms>0&&(g->scene_ms/100)%2==0)box(c,153,160,14,4,RED);
 }
 static void hud(canvas_t *c,const an_game_t *g){
-    box(c,32,8,216,25,INK);number(c,40,15,g->stage,1,GOLD);
+    panel(c,32,8,216,25,INK);number(c,40,15,g->stage,1,GOLD);
     ztext(c,64,13,AN_PROGRESS,1,CREAM);number(c,94,15,g->kills,1,TEAL);text(c,106,15,"/",1,CREAM);number(c,113,15,g->goal,1,CREAM);
     ztext(c,142,13,AN_SCORE,1,CREAM);number(c,173,15,g->score,1,GOLD);
-    for(int i=0;i<3;i++)box(c,260+i*9,13,6,9,i<g->health?TEAL:RGB(54,64,86));
+    for(int i=0;i<3;i++)panel(c,260+i*9,13,6,9,i<g->health?TEAL:RGB(54,64,86));
     if(g->phase!=AN_PLAY)return;
-    box(c,75,43,170,19,INK);ztext(c,81,46,AN_STAMINA,1,CREAM);
-    box(c,116,50,118,5,RGB(45,54,78));box(c,116,50,118*g->stamina/100,5,g->stamina>=24?TEAL:RED);
+    panel(c,75,43,170,19,INK);ztext(c,81,46,AN_STAMINA,1,CREAM);
+    panel(c,116,50,118,5,RGB(45,54,78));panel(c,116,50,118*g->stamina/100,5,g->stamina>=24?TEAL:RED);
     if(g->riposte_ms>0){center(c,65,AN_RIPOSTE,1,GOLD);number(c,244,68,g->combo,1,GOLD);}
     if(g->feedback_ms>0)center(c,102,an_feedback[g->feedback],1,g->feedback==1?GOLD:g->feedback>=6?RED:CREAM);
-    box(c,32,215,256,21,INK);center(c,218,g->guarding?AN_GUARD:g->broken_ms>0?AN_BROKEN:AN_READY,1,CREAM);
+    panel(c,32,215,256,21,INK);center(c,218,g->guarding?AN_GUARD:g->broken_ms>0?AN_BROKEN:AN_READY,1,CREAM);
 }
 static void overlay(canvas_t *c,const an_game_t *g){
     if(g->phase==AN_TITLE){
         center(c,37,AN_TITLE_TEXT,2,CREAM);center(c,72,AN_SUBTITLE,1,TEAL);
-        box(c,38,93,244,43,INK);center(c,100,an_stage_names[g->stage-1],1,GOLD);center(c,119,AN_START,1,TEAL);
-        box(c,32,211,256,26,INK);center(c,213,AN_CONTROL,1,CREAM);
+        panel(c,38,93,244,43,INK);center(c,100,an_stage_names[g->stage-1],1,GOLD);center(c,119,AN_START,1,TEAL);
+        panel(c,32,211,256,26,INK);center(c,213,AN_CONTROL,1,CREAM);
         center(c,139,AN_SELECT,1,RGB(152,176,203));ztext(c,34,14,g->muted?AN_MUTED:AN_SOUND,1,CREAM);
     }else if(g->phase==AN_PAUSED||g->phase==AN_CLEAR||g->phase==AN_FAILED){
-        box(c,39,55,242,137,TEAL);box(c,41,57,238,133,INK);
+        panel(c,39,55,242,137,TEAL);panel(c,41,57,238,133,INK);
         center(c,69,g->phase==AN_PAUSED?AN_PAUSED_TEXT:g->phase==AN_FAILED?AN_FAILED_TEXT:g->stage==5?AN_CLEAR_TEXT:AN_WON,2,CREAM);
         ztext(c,92,106,AN_SCORE,1,CREAM);number(c,148,108,g->score,2,GOLD);
         ztext(c,92,128,AN_BEST,1,CREAM);number(c,148,130,g->best,1,TEAL);

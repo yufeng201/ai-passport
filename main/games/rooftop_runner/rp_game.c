@@ -49,7 +49,7 @@ static void jump(rp_game_t *g){
 static void step(rp_game_t *g){
     g->elapsed_ms+=20;if(g->coyote_ms>0)g->coyote_ms-=20;
     if(g->feedback_ms>0)g->feedback_ms-=20;
-    int dir=g->held&1u?1:g->held&2u?-1:0;
+    int dir=g->held&1u?-1:g->held&2u?1:0;
     if(dir)g->facing=dir;
     if(g->grounded)g->vx=dir*RP_SPEED;else if(dir)g->vx=dir*RP_SPEED;
     int old_x=g->x,old_y=g->y;
@@ -127,7 +127,7 @@ void rp_edge(rp_game_t *g,int key,int down,uint32_t now){
     else if(g->phase==RP_CLEAR&&key==1){if(g->stage<5)g->stage++;rp_start(g);}
     else if(g->phase==RP_PLAY){
         if(key==2)jump(g);
-        else{g->last_dir=key==0?1:-1;g->released_ms=g->last_ms;if(g->grounded)g->vx=0;}
+        else{g->last_dir=key==0?-1:1;g->released_ms=g->last_ms;if(g->grounded)g->vx=0;}
     }
 }
 void rp_cancel(rp_game_t *g,uint32_t now){rp_update(g,now);if(g->phase==RP_PLAY)phase(g,RP_PAUSED);else clear_input(g);}

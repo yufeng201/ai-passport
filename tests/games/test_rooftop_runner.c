@@ -8,35 +8,49 @@ static void tap(rp_game_t *g,int k){rp_edge(g,k,1,g->last_ms);rp_edge(g,k,0,g->l
 static void start(rp_game_t *g,int stage){rp_init(g,0,0xA11E);g->stage=stage;g->unlocked=stage;rp_start(g);}
 static void input(void){
  rp_game_t g;start(&g,1);int x=g.x;
- rp_edge(&g,0,1,0);tick(&g);assert(g.x==x+RP_SPEED);rp_edge(&g,1,1,g.last_ms);assert(g.held==1);
- rp_edge(&g,0,0,g.last_ms);tick(&g);assert(g.x==x+RP_SPEED&&g.vx==0);rp_edge(&g,1,0,g.last_ms);
- rp_edge(&g,1,1,g.last_ms);tick(&g);assert(g.x==x);rp_edge(&g,1,0,g.last_ms);
+ rp_edge(&g,1,1,0);tick(&g);assert(g.x==x+RP_SPEED);rp_edge(&g,0,1,g.last_ms);assert(g.held==2);
+ rp_edge(&g,1,0,g.last_ms);tick(&g);assert(g.x==x+RP_SPEED&&g.vx==0);rp_edge(&g,0,0,g.last_ms);
+ rp_edge(&g,0,1,g.last_ms);tick(&g);assert(g.x==x);rp_edge(&g,0,0,g.last_ms);
  tap(&g,2);assert(!g.grounded&&g.vx==-RP_SPEED&&g.vy<0);
- rp_edge(&g,0,1,g.last_ms);tick(&g);assert(g.vx==RP_SPEED);rp_edge(&g,0,0,g.last_ms);
+ rp_edge(&g,1,1,g.last_ms);tick(&g);assert(g.vx==RP_SPEED);rp_edge(&g,1,0,g.last_ms);
  for(int i=0;i<60&&!g.grounded&&g.phase==RP_PLAY;i++)tick(&g);
  assert(g.grounded&&g.vx==0);x=g.x;for(int i=0;i<20;i++)tick(&g);assert(g.x==x);
  tap(&g,2);assert(g.vx==0);int vy=g.vy;tap(&g,2);assert(g.vy>vy); /* No double jump. */
  start(&g,1);rp_edge(&g,2,1,0);for(int i=0;i<40;i++)tick(&g);assert(g.phase==RP_PAUSED&&g.grounded);rp_edge(&g,2,0,g.last_ms);
  int y=g.y,elapsed=(int)g.elapsed_ms;x=g.x;for(int i=0;i<30;i++)tick(&g);assert(g.x==x&&g.y==y&&g.elapsed_ms==(unsigned)elapsed);
- tap(&g,1);assert(g.phase==RP_PLAY&&g.grounded);rp_edge(&g,0,1,g.last_ms);tick(&g);assert(g.x>x);rp_cancel(&g,g.last_ms);rp_edge(&g,0,0,g.last_ms);assert(g.phase==RP_PAUSED);tap(&g,1);x=g.x;tick(&g);assert(g.x==x);
+ tap(&g,1);assert(g.phase==RP_PLAY&&g.grounded);rp_edge(&g,1,1,g.last_ms);tick(&g);assert(g.x>x);rp_cancel(&g,g.last_ms);rp_edge(&g,1,0,g.last_ms);assert(g.phase==RP_PAUSED);tap(&g,1);x=g.x;tick(&g);assert(g.x==x);
  start(&g,1);rp_edge(&g,2,1,100);rp_update(&g,80);assert(g.phase==RP_PLAY);rp_edge(&g,2,0,140);assert(!g.grounded&&g.vx==0);
  rp_init(&g,UINT32_MAX-10,1);rp_start(&g);rp_update(&g,9);assert(g.elapsed_ms==20);
  start(&g,1);g.unlocked=4;g.best=1200;g.muted=1;rp_start(&g);assert(g.unlocked==4&&g.best==1200&&g.muted);
 }
+/* Physical A/B and arrow labels must agree in both movement and jump memory. */
+static void direction_mapping(void){
+ for(int key=0;key<2;key++){
+  rp_game_t g;start(&g,1);g.x=100*RP_Q;int x=g.x;
+  int dir=key==0?-1:1;
+  rp_edge(&g,key,1,g.last_ms);tick(&g);
+  assert(g.x==x+dir*RP_SPEED&&g.facing==dir);
+  rp_edge(&g,key,0,g.last_ms);tick(&g);
+  assert(g.vx==0&&g.last_dir==dir);
+  tap(&g,2);assert(g.vx==dir*RP_SPEED&&!g.grounded);
+  int other=1-key;rp_edge(&g,other,1,g.last_ms);tick(&g);
+  assert(g.vx==-dir*RP_SPEED&&g.facing==-dir);
+ }
+}
 static void forgiving_jumps(void){
  rp_game_t g;start(&g,1);
  /* Late edge jump still works; repeating C in flight cannot jump again. */
- g.x=164*RP_Q;rp_edge(&g,0,1,g.last_ms);tick(&g);assert(!g.grounded&&g.coyote_ms==100);
- rp_edge(&g,0,0,g.last_ms);tap(&g,2);assert(g.vy==-10*RP_Q&&g.coyote_ms==0&&g.vx==RP_SPEED);
+ g.x=164*RP_Q;rp_edge(&g,1,1,g.last_ms);tick(&g);assert(!g.grounded&&g.coyote_ms==100);
+ rp_edge(&g,1,0,g.last_ms);tap(&g,2);assert(g.vy==-10*RP_Q&&g.coyote_ms==0&&g.vx==RP_SPEED);
  int vy=g.vy;tap(&g,2);assert(g.vy>vy&&g.jump_buffer_ms==100);
  for(int i=0;i<6;i++)tick(&g);assert(!g.jump_buffer_ms);
- start(&g,1);rp_edge(&g,0,1,0);tick(&g);rp_edge(&g,0,0,g.last_ms);for(int i=0;i<15;i++)tick(&g);tap(&g,2);assert(g.vx==RP_SPEED);
+ start(&g,1);rp_edge(&g,1,1,0);tick(&g);rp_edge(&g,1,0,g.last_ms);for(int i=0;i<15;i++)tick(&g);tap(&g,2);assert(g.vx==RP_SPEED);
  /* Near touchdown, a short release is remembered and consumed exactly once. */
  start(&g,1);g.grounded=0;g.platform=-1;g.y=(196-30)*RP_Q;g.vy=3*RP_Q;g.vx=0;
  tap(&g,2);assert(g.jump_buffer_ms==100);for(int i=0;i<5&&g.vy>=0;i++)tick(&g);
  assert(g.vy<0&&!g.grounded&&g.jump_buffer_ms==0);
  start(&g,1);g.grounded=0;g.platform=-1;g.y=100*RP_Q;g.vy=0;tap(&g,2);assert(g.jump_buffer_ms);rp_cancel(&g,g.last_ms);assert(!g.jump_buffer_ms);tap(&g,1);for(int i=0;i<35&&!g.grounded;i++)tick(&g);assert(g.grounded&&g.vy==0);
- start(&g,1);rp_edge(&g,1,1,0);tick(&g);rp_edge(&g,1,0,g.last_ms);tick(&g);assert(g.facing==-1&&g.vx==0);
+ start(&g,1);rp_edge(&g,0,1,0);tick(&g);rp_edge(&g,0,0,g.last_ms);tick(&g);assert(g.facing==-1&&g.vx==0);
 }
 static void collisions(void){
  rp_game_t g;start(&g,5);rp_platform_t *p=&g.platforms[1];
@@ -54,14 +68,14 @@ static void collisions(void){
 static void campaigns(void){
  int count=0;
  for(int delay=20;delay<=100;delay+=20)for(int margin=-2;margin<=4;margin+=2)for(int stage=1;stage<=5;stage++){
-  rp_game_t g;start(&g,stage);int held=0;rp_edge(&g,0,1,0);
+  rp_game_t g;start(&g,stage);int held=0;rp_edge(&g,1,1,0);
   for(int n=0;n<20000&&g.phase==RP_PLAY;n++){
    if(g.grounded&&g.platform<11){rp_platform_t *p=&g.platforms[g.platform];
     if(g.x/RP_Q>=p->x+p->w-margin){
-     if(held){rp_edge(&g,0,0,g.last_ms);held=0;}
+     if(held){rp_edge(&g,1,0,g.last_ms);held=0;}
      rp_edge(&g,2,1,g.last_ms);rp_edge(&g,2,0,g.last_ms+(unsigned)delay);
-    }else if(!held){rp_edge(&g,0,1,g.last_ms);held=1;}
-   }else if(g.grounded&&g.platform==11&&!held){rp_edge(&g,0,1,g.last_ms);held=1;}
+    }else if(!held){rp_edge(&g,1,1,g.last_ms);held=1;}
+   }else if(g.grounded&&g.platform==11&&!held){rp_edge(&g,1,1,g.last_ms);held=1;}
    tick(&g);
   }
   if(g.phase!=RP_CLEAR){fprintf(stderr,"route delay=%d margin=%d stage=%d phase=%d platform=%d x=%d y=%d falls=%d\n",delay,margin,stage,g.phase,g.platform,g.x/RP_Q,g.y/RP_Q,g.falls);assert(g.phase==RP_CLEAR);}
@@ -72,13 +86,13 @@ static void campaigns(void){
 static void backward_routes(void){
  for(int stage=1;stage<=5;stage++){
   rp_game_t g;start(&g,stage);g.platform=10;g.x=(g.platforms[10].x+85)*RP_Q;g.y=g.platforms[10].y*RP_Q;
-  int held=1;rp_edge(&g,1,1,g.last_ms);
+  int held=1;rp_edge(&g,0,1,g.last_ms);
   for(int n=0;n<12000&&g.phase==RP_PLAY;n++){
    if(g.grounded&&g.platform==0&&g.x<80*RP_Q)break;
    if(g.grounded&&g.platform>0){rp_platform_t *p=&g.platforms[g.platform];
-    if(g.x/RP_Q<=p->x+55){if(held){rp_edge(&g,1,0,g.last_ms);held=0;}tap(&g,2);}
-    else if(!held){rp_edge(&g,1,1,g.last_ms);held=1;}
-   }else if(g.grounded&&!held){rp_edge(&g,1,1,g.last_ms);held=1;}
+    if(g.x/RP_Q<=p->x+55){if(held){rp_edge(&g,0,0,g.last_ms);held=0;}tap(&g,2);}
+    else if(!held){rp_edge(&g,0,1,g.last_ms);held=1;}
+   }else if(g.grounded&&!held){rp_edge(&g,0,1,g.last_ms);held=1;}
    int camera=g.camera;tick(&g);assert(g.camera-camera<=8&&camera-g.camera<=8);
   }
   assert(g.phase==RP_PLAY&&g.grounded&&g.platform==0&&g.x<80*RP_Q&&g.falls==0);
@@ -105,4 +119,4 @@ static void upgrade_tests(void){
  tick(&g);assert(g.phase==RP_CLEAR&&g.score==1900&&g.best==1900);
  tick(&g);assert(g.score==1900);
 }
-int main(int argc,char **argv){upgrade_tests();if(argc>1&&!strcmp(argv[1],"replay")){replay();return 0;}input();forgiving_jumps();collisions();campaigns();backward_routes();strips();printf("Rooftop Runner host tests: PASS (state %zu bytes)\n",sizeof(rp_game_t));return 0;}
+int main(int argc,char **argv){upgrade_tests();if(argc>1&&!strcmp(argv[1],"replay")){replay();return 0;}input();direction_mapping();forgiving_jumps();collisions();campaigns();backward_routes();strips();printf("Rooftop Runner host tests: PASS (state %zu bytes)\n",sizeof(rp_game_t));return 0;}

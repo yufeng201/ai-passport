@@ -48,3 +48,21 @@ Each game's `build/games/<game>/upgrade-*.json/log` records its build, host test
 Each bundle is under `build/firmware/<full-image-sha256>/`; use its merged image at offset `0x0`. All five complete gates, archive verification and publishing file validations passed. These binaries have not been flashed or uploaded.
 
 The latest server refresh confirms Rooftop Runner project 843, revision 1767 is approved/published. This is the previous version, not this new batch. No pending-review conflict remains for that project; a fresh matching update grant is still required.
+
+
+## Chinese type and smooth illustration update
+
+All five games now use licensed Noto Sans CJK SC Medium at three independently rasterized sizes, with 4bpp antialiasing for Chinese and ASCII. Rounded panels, analytically drawn ellipses/strokes, curved characters and vector medals replace enlarged bitmap lettering and Road Rage’s motorcycle sprite. The two 25 KiB display strips remain; there is no supersampled framebuffer. Browser Wasm memory increases to 512 KiB for immutable font data and its preview framebuffer, independently of device RAM. Renderer previews are composed from native 320 × 240 fixtures, enlarged with Lanczos, and labeled as code previews rather than device captures.
+
+Only project 795 was submitted using its matching update grant: revision 1800 is pending review. The existing project remains public on its previous approved revision. No other project was uploaded. This latest typography change has not been committed or pushed, so the update omits a source URL rather than linking an incomplete public revision.
+
+
+| Game | Full image bytes | Full SHA-256 | ELF SHA-256 |
+| --- | --- | --- | --- |
+| road_rage | 647264 | `308f6fdcf6a8021976fe8222a82a2105005fc46cfd0b010bb0af8ccc8dbfddfb` | `705f321c74745142c46b90e38acbaa1c50b5f579392bb79bb21430e524103652` |
+| cloudbound | 617472 | `75d3c30df6394099dc84141ae2631b0a9c69f9a14f38f5018b450ed924671785` | `49f64f564c4917fda1f212cd371dfcb07f8e588efa98505f46c57daf5adbe947` |
+| alley_ninja | 637024 | `894d3e39e8bddb9328d6bd96a18439082fa7bd5df5393ebd9240a0b0d18e44fb` | `04cfb6ffcc401d0afb83c3adfd1a512cdc5e70c8a7ebb3fdf3d3738d2748df42` |
+| brick_workshop | 601200 | `f13db25b68868cec675ef05ac440f091a3eba2b990192aa140f048cf9ef899fd` | `097dbbbeab0615296a83339d191304e4832e160b87ab23f7087461d9eddb2f66` |
+| rooftop_runner | 612160 | `55ca0a1281a0ef19990335ce448469bb54595d7a3ec2f4c7eeeb2e57b97b1d14` | `55b48a9bf0ced93f1321da5b6ce6ca1ecb09cb2a50baba705a78a36330ad892c` |
+
+All five complete gates and native/Wasm parity checks passed. Device tests: NOT RUN. Physical frame timing, readable glyphs, audio and persistence remain unverified.
